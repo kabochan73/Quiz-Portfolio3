@@ -1,0 +1,78 @@
+# push / Pull Request のたびに、コード整形のチェック(Pint)とテスト(Pest)を自動で実行する。
+# Railway は、この CI が通ったコミットだけをデプロイする(architecture.md 8.3)。
+# 起動を速くするため Docker Compose は使わず、PHP と PostgreSQL を Actions の仕組みで用意する。
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  pint:
+    name: Pint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.5'
+          coverage: none
+
+      - run: composer install --no-interaction --prefer-dist --no-progress
+
+      - run: ./vendor/bin/pint --test
+
+  test:
+    name: Pest
+    runs-on: ubuntu-latest
+
+    # テストは本番と同じ PostgreSQL で行う(phpunit.xml のコメント参照)。
+    # DB 名・ユーザー名・パスワードはローカル(docker-compose.yml)とそろえる。
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_DB: quiz_testing
+          POSTGRES_USER: quiz
+          POSTGRES_PASSWORD: secret
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U quiz -d quiz_testing"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    # .env の DB_HOST はローカルの Docker 用(db)なので、CI では上書きする。
+    # 実際の環境変数は .env より優先される。
+    env:
+      DB_HOST: 127.0.0.1
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.5'
+          extensions: pdo_pgsql, intl, zip
+          coverage: none
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - run: composer install --no-interaction --prefer-dist --no-progress
+
+      - name: .env を用意する
+        run: |
+          cp .env.example .env
+          php artisan key:generate
+
+      # 画面のテストで @vite が参照するビルド結果(public/build)を作っておく
+      - run: npm ci
+      - run: npm run build
+
+      - run: php artisan test
