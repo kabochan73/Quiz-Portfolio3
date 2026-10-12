@@ -1,7 +1,9 @@
 <?php
 
+use App\Http\Controllers\AttemptController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\HistoryController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\QuestionController;
 use App\Http\Controllers\SectionController;
@@ -27,4 +29,13 @@ Route::middleware('auth')->group(function () {
     Route::resource('categories.sections', SectionController::class)->shallow()->except('index');
     // 作成は /sections/{section}/questions、それ以外は /questions/{question}(requirements.md 6章)
     Route::resource('sections.questions', QuestionController::class)->shallow()->except('index');
+
+    Route::get('/sections/{section}/history', [HistoryController::class, 'index'])->name('sections.history.index');
+    // 挑戦が URL のセクションのものでなければ 404(architecture.md 6章)
+    Route::get('/sections/{section}/history/{attempt}', [HistoryController::class, 'show'])
+        ->scopeBindings()
+        ->name('sections.history.show');
+
+    Route::get('/attempts/{attempt}/status', [AttemptController::class, 'status'])->name('attempts.status');
+    Route::post('/attempts/{attempt}/regrade', [AttemptController::class, 'regrade'])->name('attempts.regrade');
 });
