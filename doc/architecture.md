@@ -538,7 +538,7 @@ web と worker で共通の値は Railway の Shared Variables に置く。
 | `LOG_CHANNEL` | `stderr`(Railway のログ画面で見られるように) |
 | `GRADING_DRIVER` | `claude` |
 | `ANTHROPIC_API_KEY` / `ANTHROPIC_MODEL` | API キー / `claude-sonnet-5-5` |
-| `ADMIN_EMAIL` / `ADMIN_PASSWORD` | 本番用の値(12文字以上) |
+| `ADMIN_EMAIL` / `ADMIN_PASSWORD` | 本番用の値(パスワードはランダムな8文字以上) |
 | `QUIZ_PRICE_*` | Anthropic の公式料金表の値 |
 
 - API キーやパスワードはリポジトリに入れない(Railway の画面か CLI で設定する)
