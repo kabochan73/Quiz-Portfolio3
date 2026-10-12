@@ -3,6 +3,7 @@
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\QuestionController;
 use App\Http\Controllers\SectionController;
 use Illuminate\Support\Facades\Route;
 
@@ -24,4 +25,6 @@ Route::middleware('auth')->group(function () {
     // 作成は /categories/{category}/sections、それ以外は /sections/{section}(requirements.md 6章)。
     // セクション一覧はカテゴリ詳細にあるので、index は作らない
     Route::resource('categories.sections', SectionController::class)->shallow()->except('index');
+    // 作成は /sections/{section}/questions、それ以外は /questions/{question}(requirements.md 6章)
+    Route::resource('sections.questions', QuestionController::class)->shallow()->except('index');
 });
