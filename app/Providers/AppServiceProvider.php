@@ -9,7 +9,9 @@ use App\Services\Grading\GradeResultParser;
 use App\Services\Grading\GradingPrompt;
 use App\Services\Grading\GradingService;
 use App\Support\CostCalculator;
+use App\View\Composers\SidebarComposer;
 use Illuminate\Contracts\Foundation\Application;
+use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 use InvalidArgumentException;
 
@@ -58,6 +60,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        // サイドバーの部品(フェーズ5で作る)が使われるときに、カテゴリの一覧を渡す
+        View::composer('components.layout.sidebar', SidebarComposer::class);
     }
 }
