@@ -23,9 +23,13 @@
         <env name="BCRYPT_ROUNDS" value="4"/>
         <env name="BROADCAST_CONNECTION" value="null"/>
         <env name="CACHE_STORE" value="array"/>
-        <env name="DB_CONNECTION" value="sqlite"/>
-        <env name="DB_DATABASE" value=":memory:"/>
+        <!-- DISTINCT ON や CHECK 制約など PostgreSQL 固有の機能を使うため、テストも PostgreSQL で行う。
+             開発用のデータを消さないよう、DB は quiz_testing に分ける(docker/postgres/init.sql で作成) -->
+        <env name="DB_CONNECTION" value="pgsql"/>
+        <env name="DB_DATABASE" value="quiz_testing"/>
         <env name="DB_URL" value=""/>
+        <!-- テストで実際の Claude API を呼ばないよう、採点は常にフェイクにする(CLAUDE.md) -->
+        <env name="GRADING_DRIVER" value="fake"/>
         <env name="MAIL_MAILER" value="array"/>
         <env name="QUEUE_CONNECTION" value="sync"/>
         <env name="SESSION_DRIVER" value="array"/>
