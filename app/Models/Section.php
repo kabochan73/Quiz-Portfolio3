@@ -36,4 +36,12 @@ class Section extends Model
     {
         return $this->hasMany(Question::class)->orderBy('id');
     }
+
+    /**
+     * @return HasMany<Attempt, $this>
+     */
+    public function attempts(): HasMany
+    {
+        return $this->hasMany(Attempt::class);
+    }
 }

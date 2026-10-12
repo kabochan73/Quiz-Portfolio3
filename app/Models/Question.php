@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
  * 問題(requirements.md 3.2)。編集できるのは問題文だけ。
@@ -24,5 +25,13 @@ class Question extends Model
     public function section(): BelongsTo
     {
         return $this->belongsTo(Section::class);
+    }
+
+    /**
+     * @return HasMany<Answer, $this>
+     */
+    public function answers(): HasMany
+    {
+        return $this->hasMany(Answer::class);
     }
 }
