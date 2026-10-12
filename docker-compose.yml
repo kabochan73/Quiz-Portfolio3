@@ -1,0 +1,54 @@
+# ローカル開発環境(architecture.md 1章)
+# app / nginx / db / worker の4コンテナ。ソースコードはマウントするので、編集はすぐ反映される。
+services:
+    app:
+        build: ./docker/php
+        volumes:
+            - .:/var/www/html
+        depends_on:
+            db:
+                condition: service_healthy
+
+    nginx:
+        image: nginx:stable-alpine
+        ports:
+            - "8000:80"
+        volumes:
+            - .:/var/www/html:ro
+            - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+        depends_on:
+            - app
+
+    db:
+        image: postgres:17-alpine
+        environment:
+            POSTGRES_DB: quiz
+            POSTGRES_USER: quiz
+            POSTGRES_PASSWORD: secret
+        ports:
+            - "5432:5432"
+        volumes:
+            - db-data:/var/lib/postgresql/data
+            - ./docker/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+        # app と worker は DB の準備ができてから起動させる(起動直後の接続エラーを防ぐ)
+        healthcheck:
+            test: ["CMD-SHELL", "pg_isready -U quiz -d quiz"]
+            interval: 5s
+            timeout: 5s
+            retries: 10
+
+    # 採点 Job を処理する係(requirements.md 3.3)。app と同じイメージを使う。
+    # 開発中はコードの変更を Job ごとに読み直してくれる queue:listen を使う
+    # (queue:work はコードを読み込んだままになり、再起動しないと変更が反映されないため)。
+    worker:
+        build: ./docker/php
+        command: php artisan queue:listen --sleep=3
+        volumes:
+            - .:/var/www/html
+        depends_on:
+            db:
+                condition: service_healthy
+        restart: unless-stopped
+
+volumes:
+    db-data:
