@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AnswerController;
 use App\Http\Controllers\AttemptController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\CategoryController;
@@ -29,6 +30,9 @@ Route::middleware('auth')->group(function () {
     Route::resource('categories.sections', SectionController::class)->shallow()->except('index');
     // 作成は /sections/{section}/questions、それ以外は /questions/{question}(requirements.md 6章)
     Route::resource('sections.questions', QuestionController::class)->shallow()->except('index');
+
+    Route::get('/sections/{section}/answers/create', [AnswerController::class, 'create'])->name('sections.answers.create');
+    Route::post('/sections/{section}/answers', [AnswerController::class, 'store'])->name('sections.answers.store');
 
     Route::get('/sections/{section}/history', [HistoryController::class, 'index'])->name('sections.history.index');
     // 挑戦が URL のセクションのものでなければ 404(architecture.md 6章)
