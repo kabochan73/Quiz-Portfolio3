@@ -3,7 +3,50 @@
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
 @source '../../storage/framework/views/*.php';
 
+/*
+|--------------------------------------------------------------------------
+| デザイントークン(design-guide.md)
+|--------------------------------------------------------------------------
+|
+| 画面では色コードや px 値を直接書かず、ここで決めたトークンと Tailwind 標準の値だけを使う(CLAUDE.md)。
+| v3 は黒と白を基調にしたシックなデザイン。グレーは色味のない neutral を使い、
+| 色を使うのは点数と状態のバッジ(emerald / amber / rose / sky)だけにする(design-guide.md 2章)。
+|
+*/
+
 @theme {
-    --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
-        'Segoe UI Symbol', 'Noto Color Emoji';
+    /* design-guide.md 3.1: 英数字は Inter、日本語は Noto Sans JP(vite.config.js で読み込む) */
+    --font-sans: 'Inter', 'Noto Sans JP', system-ui, sans-serif;
+
+    /* design-guide.md 2.2: アクセントカラーは使わず、黒を「操作できるもの・現在地」の色にする */
+    --color-ink: var(--color-neutral-950);
+    --color-ink-hover: var(--color-neutral-800);
+
+    /* design-guide.md 3.2: 本文(問題文・回答・フィードバック)。Tailwind 標準の sm と base の間のサイズで、行間は広め */
+    --text-body: 0.9375rem;
+    --text-body--line-height: 1.75;
+}
+
+@layer base {
+    /* design-guide.md 2.1: ページの背景は白、本文は neutral-700 */
+    body {
+        @apply bg-white font-sans text-neutral-700 antialiased;
+    }
+
+    /* design-guide.md 5章: 動きを減らす設定のときは、トランジションとアニメーションを止める */
+    @media (prefers-reduced-motion: reduce) {
+        *,
+        *::before,
+        *::after {
+            animation-duration: 0.01ms !important;
+            animation-iteration-count: 1 !important;
+            transition-duration: 0.01ms !important;
+            scroll-behavior: auto !important;
+        }
+    }
+
+    /* Alpine.js が動き出す前に、閉じているはずのメニューやモーダルが一瞬見えるのを防ぐ */
+    [x-cloak] {
+        display: none !important;
+    }
 }
