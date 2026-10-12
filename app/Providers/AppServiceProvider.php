@@ -2,7 +2,11 @@
 
 namespace App\Providers;
 
+use Anthropic\Client;
+use App\Services\Grading\ClaudeGradingService;
 use App\Services\Grading\FakeGradingService;
+use App\Services\Grading\GradeResultParser;
+use App\Services\Grading\GradingPrompt;
 use App\Services\Grading\GradingService;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Support\ServiceProvider;
@@ -19,9 +23,27 @@ class AppServiceProvider extends ServiceProvider
         // 使う側は GradingService を受け取るだけで、フェイクか本物かを知らなくてよい
         $this->app->bind(GradingService::class, fn (Application $app) => match ($app['config']->get('services.grading.driver')) {
             'fake' => $app->make(FakeGradingService::class),
+            'claude' => $this->makeClaudeGradingService($app),
             // 設定の書き間違いに気づけるよう、知らない値はエラーにする
             default => throw new InvalidArgumentException('GRADING_DRIVER の値が正しくありません: '.$app['config']->get('services.grading.driver')),
         });
+    }
+
+    private function makeClaudeGradingService(Application $app): ClaudeGradingService
+    {
+        $apiKey = $app['config']->get('services.anthropic.api_key');
+
+        // キーがないまま動かすと、採点のたびに失敗してリトライを繰り返すので、ここで止める
+        if (blank($apiKey)) {
+            throw new InvalidArgumentException('GRADING_DRIVER=claude のときは ANTHROPIC_API_KEY を設定してください。');
+        }
+
+        return new ClaudeGradingService(
+            client: new Client(apiKey: $apiKey),
+            prompt: new GradingPrompt,
+            parser: new GradeResultParser,
+            model: $app['config']->get('services.anthropic.model'),
+        );
     }
 
     /**

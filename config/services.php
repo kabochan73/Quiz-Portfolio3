@@ -36,9 +36,16 @@ return [
     ],
 
     // AI 採点の切り替え(architecture.md 4.4)。AppServiceProvider でこの値を見て GradingService を選ぶ。
-    // fake: Claude API を呼ばない決まった採点。設定し忘れても料金がかからないよう、既定値は fake にする
+    // fake: Claude API を呼ばない決まった採点 / claude: Claude API での本物の採点。
+    // 設定し忘れても料金がかからないよう、既定値は fake にする
     'grading' => [
         'driver' => env('GRADING_DRIVER', 'fake'),
+    ],
+
+    // Claude API(GRADING_DRIVER=claude のときに使う。architecture.md 4.4)
+    'anthropic' => [
+        'api_key' => env('ANTHROPIC_API_KEY'),
+        'model' => env('ANTHROPIC_MODEL', 'claude-sonnet-5-5'),
     ],
 
 ];
