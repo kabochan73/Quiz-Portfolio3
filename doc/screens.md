@@ -531,6 +531,7 @@ Tips
 | | 問題カード | `Question 1` / `Answered` |
 | | 送信ボタン | `Submit (8)` → 送信中は `Submitting…` |
 | | 未入力 | `Please answer all questions.` |
+| | 開いたあとに問題が追加・削除された(送った問題の組み合わせが合わない) | `The questions have changed. Please reload the page.` |
 | 結果(採点中) | 見出し / 説明 | `Grading…` / `AI is checking 8 answers. This can take about a minute.` / `You can leave this page. Grading will continue.` |
 | | 5分たっても終わらない | `This is taking longer than usual. Please reload the page later.` |
 | 結果(完了) | 見出し / 平均 | `Results` / `Average` |
