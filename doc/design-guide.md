@@ -174,12 +174,14 @@ Blade の匿名コンポーネントとして `resources/views/components/ui/` �
 - 状態バッジ: `pending` `Waiting` / `grading` `Grading` / `completed` `Done` / `failed` `Failed`(screens.md 4.4)
 - 種別バッジ: `all` `All` / `weak` `Weak`(`neutral-100` 背景の控えめな表示)
 
-### 7.5 トースト `<x-ui.toast>`
+### 7.5 トースト `<x-ui.toast-stack>`
 
 - 画面の右下(スマホでは下中央)に表示する
 - 成功(緑のチェックアイコン)/ エラー(赤のアイコン)の2種類
 - 4秒で自動的に消える。×ボタンで手動でも閉じられる
 - コントローラからは `->with('toast', ['type' => 'success', 'message' => '...'])` で渡す
+- 画面の JS からは `window.dispatchEvent(new CustomEvent('toast', { detail: { type, message } }))` で出す(回答フォームの `Draft restored.` など)
+- 部品はトーストを積み重ねて出す入れ物(`toast-stack`)として、レイアウトに1つだけ置く
 - `role="status"`(エラーは `role="alert"`)を付ける
 
 ### 7.6 確認モーダル `<x-ui.confirm-modal>`

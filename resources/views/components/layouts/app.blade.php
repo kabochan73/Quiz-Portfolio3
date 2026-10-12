@@ -72,5 +72,7 @@
             {{ $slot }}
         </div>
     </main>
+
+    <x-ui.toast-stack />
 </body>
 </html>
