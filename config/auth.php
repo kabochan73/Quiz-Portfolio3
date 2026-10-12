@@ -41,6 +41,8 @@ return [
         'web' => [
             'driver' => 'session',
             'provider' => 'users',
+            // ログイン状態を保持する期間(分)。ログインから30日(requirements.md 3.1)。Laravel の標準は約400日
+            'remember' => 60 * 24 * 30,
         ],
     ],
 
