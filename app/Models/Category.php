@@ -35,4 +35,14 @@ class Category extends Model
     {
         return $this->hasManyThrough(Question::class, Section::class);
     }
+
+    /**
+     * カテゴリ内の全挑戦。削除の確認モーダルの件数に使う(screens.md 2.4)。
+     *
+     * @return HasManyThrough<Attempt, Section, $this>
+     */
+    public function attempts(): HasManyThrough
+    {
+        return $this->hasManyThrough(Attempt::class, Section::class);
+    }
 }
