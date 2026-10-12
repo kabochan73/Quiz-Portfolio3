@@ -443,17 +443,18 @@ COMMIT
 // config/quiz.php
 'pricing' => [
     'claude-sonnet-5-5' => [
-        'input_per_mtok'  => env('PRICE_INPUT_PER_MTOK'),   // 100万入力トークンあたりのドル
-        'output_per_mtok' => env('PRICE_OUTPUT_PER_MTOK'),  // 100万出力トークンあたりのドル
+        'input_per_mtok'  => env('QUIZ_PRICE_INPUT_PER_MTOK'),   // 100万入力トークンあたりのドル
+        'output_per_mtok' => env('QUIZ_PRICE_OUTPUT_PER_MTOK'),  // 100万出力トークンあたりのドル
     ],
 ],
-'web_search_per_request' => env('PRICE_WEB_SEARCH'),        // 検索1回あたりのドル
+'web_search_per_request' => env('QUIZ_PRICE_WEB_SEARCH'),        // 検索1回あたりのドル
 ```
 
 - 単価は Anthropic の公式料金表の値を設定する(このドキュメントには値を書かない。料金が変わっても設定だけ直せばよいように)
 - 推定コスト = 入力トークン × 入力単価 + 出力トークン × 出力単価 + 検索回数 × 検索単価
 - 計算は `App\Support\CostCalculator` にまとめ、Unit テストで検証する
-- 単価が設定されていないモデルの場合、コストは表示しない(トークン数だけ表示する)
+- 単価が設定されていないモデルの場合、コストは表示しない(トークン数だけ表示する)。フェイク採点(モデル名 `fake`)や、拒否されて別のモデルが採点した場合もこれに当たる
+- 検索の単価が未設定でも、検索回数が 0 ならコストを計算する
 
 ## 6. 権限
 
