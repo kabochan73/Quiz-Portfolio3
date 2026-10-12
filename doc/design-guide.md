@@ -221,5 +221,5 @@ Blade の匿名コンポーネントとして `resources/views/components/ui/` �
 - キーボードで全操作ができること。フォーカスは常に見えるようにする(`focus-visible:ring-2 ring-ink ring-offset-2`)
 - フォームのラベルと入力欄は `for` / `id` で関連付ける
 - モーダル表示中はフォーカスをモーダル内に閉じ込める(Alpine の `x-trap`)
-- 画面ごとに `<title>` を「ページ名 | Quiz」の形で付ける(例: `Categories | Quiz`)
+- 画面ごとに `<title>` を「ページ名 | recollect」の形で付ける(例: `Categories | recollect`)
 - `<html lang="en">` にする。日本語が入る問題文・回答・採点コメントの要素には `lang="ja"` を付ける(読み上げソフトが正しい言語で読むように)
