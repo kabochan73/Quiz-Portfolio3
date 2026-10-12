@@ -35,4 +35,10 @@ return [
         ],
     ],
 
+    // AI 採点の切り替え(architecture.md 4.4)。AppServiceProvider でこの値を見て GradingService を選ぶ。
+    // fake: Claude API を呼ばない決まった採点。設定し忘れても料金がかからないよう、既定値は fake にする
+    'grading' => [
+        'driver' => env('GRADING_DRIVER', 'fake'),
+    ],
+
 ];
