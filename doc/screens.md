@@ -391,7 +391,15 @@ AIの採点中にエラーが発生しました。回答は保存されている
 
 このアプリのコンセプトと使い方を表示する(requirements.md 3.1.1)。文言は 4.3 に従う。
 
-**ホームの文章は仮のもの**(2026-10-11 時点)。正式な文章は後日決める。配置(コンセプト → 使い方 → ヒント → ボタン)だけを確定とする。
+**当面の実装(2026-10-12 決定)**: ホームの文章は後回しにする。それまでは、白紙の画面に `New category` ボタン(カテゴリ作成画面へ)だけを置く。
+
+```
+(ページ見出しなし・パンくずなし)
+
+                 [ New category ]                     ← 主ボタン
+```
+
+以下は、文章が決まったときに作るホームの設計。文章は仮のもので、配置(コンセプト → 使い方 → ヒント → ボタン)だけを確定とする。
 
 ```
 Learn by explaining                          ← ページ見出し(パンくずなし)
@@ -493,7 +501,8 @@ Tips
 | | ラベル / ボタン | `Email` / `Password` / `Log in` |
 | | 認証エラー | `These credentials do not match our records.`(Laravel 標準) |
 | | 試行回数の制限 | `Too many login attempts. Please try again in 42 seconds.`(Laravel 標準) |
-| ホーム(**文章は仮**。2.12 参照) | 見出し / リード文 | `Learn by explaining` / `Write answers in your own words. AI grades them and shows how to improve.` |
+| ホーム(当面) | ボタン | `New category` |
+| ホーム(**文章は仮・後回し**。2.12 参照) | 見出し / リード文 | `Learn by explaining` / `Write answers in your own words. AI grades them and shows how to improve.` |
 | | コンセプトの見出し | `Is this app for you?` |
 | | 向いている(`Good for`) | `Topics you want to understand and explain, like how something works or why.` / `Studying for interviews or exams with written answers.` / `Checking if you really understand, not just remember.` |
 | | 向いていない(`Not a good fit`) | `Memorizing words or facts with one right answer. Flash cards work better for that.` / `Quick quizzes. Each answer takes a few minutes to write.` |

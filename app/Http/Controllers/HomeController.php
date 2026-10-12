@@ -2,19 +2,16 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Category;
 use Illuminate\View\View;
 
 /**
- * ホーム = ログイン後の着地点。アプリのコンセプトと使い方を表示する(requirements.md 3.1.1)。
+ * ホーム = ログイン後の着地点(requirements.md 3.1.1)。
+ * いずれアプリのコンセプトと使い方を表示する。文章が決まるまでは、New category ボタンだけを置く(screens.md 2.12)。
  */
 class HomeController extends Controller
 {
     public function __invoke(): View
     {
-        return view('home', [
-            // カテゴリが0件なら、一番下のボタンを「Create your first category」にする(screens.md 2.12)
-            'hasCategories' => Category::query()->exists(),
-        ]);
+        return view('home');
     }
 }
