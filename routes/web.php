@@ -9,6 +9,8 @@ use App\Http\Controllers\HomeController;
 use App\Http\Controllers\QuestionController;
 use App\Http\Controllers\SectionController;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\MessageBag;
+use Illuminate\Support\ViewErrorBag;
 
 // Claude API を使う(費用がかかる)ので、ログインしないと何も操作できない(requirements.md 3.1)。
 // ログイン済みならホームへ、未ログインなら auth ミドルウェアがログイン画面へ移す
@@ -42,4 +44,15 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/attempts/{attempt}/status', [AttemptController::class, 'status'])->name('attempts.status');
     Route::post('/attempts/{attempt}/regrade', [AttemptController::class, 'regrade'])->name('attempts.regrade');
+
+    // 共通コンポーネントの見本ページ(implementation-plan.md 5-6)。開発環境とテストでだけ開け、本番では 404
+    Route::get('/dev/components', function () {
+        abort_unless(app()->isLocal() || app()->runningUnitTests(), 404);
+
+        // 入力欄のエラーの見た目も確かめられるよう、見本のエラーを1つ持たせる。
+        // 部品はページに渡した変数ではなく、全体に共有された $errors を読むので、share で渡す
+        view()->share('errors', (new ViewErrorBag)->put('default', new MessageBag(['demo_error' => 'The name field is required.'])));
+
+        return view('dev.components');
+    })->name('dev.components');
 });
