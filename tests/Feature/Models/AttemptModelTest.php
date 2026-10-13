@@ -80,3 +80,29 @@ test('挑戦のセクションは一括代入で変えられない', function ()
     expect($attempt->fresh()->section_id)->not->toBe($otherSection->id)
         ->and($attempt->fresh()->status)->toBe(AttemptStatus::Grading);
 });
+
+test('回答を保存するとき、問題の今の問題文を写す', function () {
+    // architecture.md 2.5(2026-10-13 決定)
+    $attempt = Attempt::factory()->create();
+    $question = Question::factory()->for($attempt->section)->create(['body' => 'TCPとUDPの違いは?']);
+
+    $answer = $attempt->answers()->create(['question_id' => $question->id, 'position' => 0, 'body' => 'a']);
+
+    expect($answer->fresh()->question_body)->toBe('TCPとUDPの違いは?');
+});
+
+test('あとから問題を書き直しても、回答の問題文の写しは変わらない', function () {
+    $answer = Answer::factory()->create();
+    $original = $answer->question_body;
+
+    $answer->question->update(['body' => '書き直した問題文']);
+
+    expect($answer->fresh()->question_body)->toBe($original)
+        ->and($original)->not->toBe('書き直した問題文');
+});
+
+test('問題文の写しを渡したときは、そのまま使う', function () {
+    $answer = Answer::factory()->create(['question_body' => '渡した問題文']);
+
+    expect($answer->question_body)->toBe('渡した問題文');
+});

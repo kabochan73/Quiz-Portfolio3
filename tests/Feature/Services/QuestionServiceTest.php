@@ -1,6 +1,5 @@
 <?php
 
-use App\Models\Answer;
 use App\Models\Attempt;
 use App\Models\Question;
 use App\Models\Section;
@@ -58,21 +57,23 @@ test('問題数を数える前に、セクションの行をロックする', fu
         ->and($lockIndex)->toBeLessThan($countIndex);
 });
 
-test('問題を削除すると、回答と採点結果も消え、空になった挑戦も消える', function () {
-    // architecture.md 4.6
+test('問題を削除しても、回答・採点結果・挑戦は残り、回答には問題文の写しが残る', function () {
+    // architecture.md 2.5 / 4.6(2026-10-13 決定): 履歴を残す
     $section = Section::factory()->create();
     [$q1, $q2] = Question::factory()->count(2)->for($section)->create();
+    $q1Body = $q1->body;
     $onlyQ1 = scoredAttempt($section, [$q1->id => 50]);
     $both = scoredAttempt($section, [$q1->id => 50, $q2->id => 80]);
 
     app(QuestionService::class)->delete($q1);
 
+    $kept = $onlyQ1->answers()->sole();
     expect(Question::find($q1->id))->toBeNull()
-        ->and(Answer::where('question_id', $q1->id)->exists())->toBeFalse()
-        // q1 にだけ回答していた挑戦は空になるので消える。q2 の回答が残る挑戦は残る
-        ->and(Attempt::find($onlyQ1->id))->toBeNull()
-        ->and(Attempt::find($both->id))->not->toBeNull()
-        ->and($both->answers()->count())->toBe(1);
+        ->and(Attempt::find($onlyQ1->id))->not->toBeNull()
+        ->and($both->answers()->count())->toBe(2)
+        ->and($kept->question_id)->toBeNull()
+        ->and($kept->question_body)->toBe($q1Body)
+        ->and($kept->score)->not->toBeNull();
 });
 
 test('回答のない問題も削除できる', function () {

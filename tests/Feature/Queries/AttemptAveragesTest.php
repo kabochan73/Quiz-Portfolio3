@@ -26,13 +26,13 @@ test('採点が完了していない挑戦は含まない', function () {
     expect((new AttemptAverages)->forAttempts([$attempt->id]))->toBe([]);
 });
 
-test('問題が削除されて回答が減ったら、残った回答で平均を出す', function () {
-    // architecture.md 4.6: 平均点は保存せず毎回計算する
+test('問題を削除しても、その回答は挑戦の平均点に残る', function () {
+    // architecture.md 2.5 / 4.6(2026-10-13 決定): 履歴は回答したときのまま残す
     $attempt = scoredAttempt($this->section, [$this->q1->id => 70, $this->q2->id => 30]);
 
     $this->q2->delete();
 
-    expect((new AttemptAverages)->forAttempts([$attempt->id]))->toBe([$attempt->id => 70.0]);
+    expect((new AttemptAverages)->forAttempts([$attempt->id]))->toBe([$attempt->id => 50.0]);
 });
 
 test('前回の平均点は、同じセクション・同じ種別のひとつ前の完了済みの挑戦から取る', function () {

@@ -39,6 +39,8 @@ function attemptSchemaInsertAnswer(int $attemptId, int $questionId, int $positio
         'attempt_id' => $attemptId,
         'question_id' => $questionId,
         'position' => $position,
+        // DB を直接操作するので、モデルが自動で入れる問題文の写しも自分で入れる
+        'question_body' => 'question',
         'body' => 'answer',
     ]);
 }
@@ -62,7 +64,7 @@ test('挑戦・回答・採点結果のテーブルが設計どおりの列を�
         'error_message', 'graded_at', 'created_at', 'updated_at',
     ])
         ->and(Schema::getColumnListing('answers'))->toEqualCanonicalizing([
-            'id', 'question_id', 'attempt_id', 'position', 'body', 'created_at', 'updated_at',
+            'id', 'question_id', 'attempt_id', 'position', 'question_body', 'body', 'created_at', 'updated_at',
         ])
         ->and(Schema::getColumnListing('scores'))->toEqualCanonicalizing([
             'id', 'answer_id', 'score', 'good_points', 'weak_points', 'model_answer', 'created_at', 'updated_at',
@@ -145,18 +147,24 @@ test('挑戦を削除すると、回答と採点結果も削除される', funct
         ->and(DB::table('scores')->count())->toBe(0);
 });
 
-test('問題を削除すると、その問題への回答と採点結果だけが削除される', function () {
-    // 回答が0件になった挑戦の削除はアプリ側の処理なので、ここでは確かめない(architecture.md 4.6)
+test('問題を削除しても、回答と採点結果は残り、回答の問題への参照だけが空になる', function () {
+    // architecture.md 2.5 / 4.6(2026-10-13 決定): 履歴を残す
     $ids = attemptSchemaSetUp();
     attemptSchemaInsertScore(attemptSchemaInsertAnswer($ids['attempt'], $ids['questions'][0], 0));
     attemptSchemaInsertScore(attemptSchemaInsertAnswer($ids['attempt'], $ids['questions'][1], 1));
 
     DB::table('questions')->where('id', $ids['questions'][0])->delete();
 
-    expect(DB::table('answers')->pluck('question_id')->all())->toBe([$ids['questions'][1]])
-        ->and(DB::table('scores')->count())->toBe(1)
+    expect(DB::table('answers')->orderBy('position')->pluck('question_id')->all())->toBe([null, $ids['questions'][1]])
+        ->and(DB::table('scores')->count())->toBe(2)
         ->and(DB::table('attempts')->count())->toBe(1);
 });
+
+test('問題文の写しは必須', function () {
+    $ids = attemptSchemaSetUp();
+
+    DB::table('answers')->insert(['attempt_id' => $ids['attempt'], 'question_id' => $ids['questions'][0], 'position' => 0, 'body' => 'a']);
+})->throws(QueryException::class);
 
 test('セクションを削除すると、その挑戦も削除される', function () {
     $ids = attemptSchemaSetUp();

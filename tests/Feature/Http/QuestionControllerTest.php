@@ -49,8 +49,8 @@ test('問題文を変更できる。所属するセクションは変えられ�
         ->toBe(['section_id' => $this->section->id, 'body' => 'Edited?']);
 });
 
-test('問題を削除すると、空になった挑戦も消え、セクション詳細へ戻る', function () {
-    // architecture.md 4.6
+test('問題を削除しても履歴は残り、セクション詳細へ戻る', function () {
+    // architecture.md 4.6(2026-10-13 決定)
     [$q1, $q2] = Question::factory()->count(2)->for($this->section)->create();
     $onlyQ1 = scoredAttempt($this->section, [$q1->id => 50]);
     $both = scoredAttempt($this->section, [$q1->id => 50, $q2->id => 80]);
@@ -60,8 +60,7 @@ test('問題を削除すると、空になった挑戦も消え、セクショ�
         ->assertSessionHas('toast', ['type' => 'success', 'message' => 'Question deleted.']);
 
     expect(Question::pluck('id')->all())->toBe([$q2->id])
-        ->and(Attempt::pluck('id')->all())->toBe([$both->id])
-        ->and(Attempt::find($onlyQ1->id))->toBeNull();
+        ->and(Attempt::orderBy('id')->pluck('id')->all())->toBe([$onlyQ1->id, $both->id]);
 });
 
 test('存在しないセクション・問題は 404', function () {
