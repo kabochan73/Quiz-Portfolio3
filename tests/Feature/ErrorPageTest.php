@@ -15,7 +15,7 @@ beforeEach(function () {
 test('存在しないページは、404 のページを出す', function () {
     $this->get('/no-such-page')
         ->assertNotFound()
-        ->assertSee('<title>Page not found | recollect</title>', false)
+        ->assertSee('<title>Page not found | Recollect</title>', false)
         ->assertSee('Back to home')
         ->assertSee(route('home'), false);
 });

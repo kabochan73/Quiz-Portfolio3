@@ -15,20 +15,16 @@
 <div class="flex h-full flex-col">
     <div class="flex h-14 items-center px-6">
         <a href="{{ route('home') }}"
-            class="text-base font-semibold tracking-tight text-neutral-900">{{ config('app.name') }}</a>
+            class="text-2xl font-semibold tracking-tight text-neutral-900">{{ config('app.name') }}</a>
     </div>
 
+    {{-- ホームへは、上の Recollect(ロゴ)から移る。役割が重なるので Home のリンクは置かない(2026-10-13 決定) --}}
     <nav class="flex-1 overflow-y-auto px-4 pb-2" aria-label="Main">
-        <a href="{{ route('home') }}" @class($linkClasses(request()->routeIs('home')))
-            @if (request()->routeIs('home')) aria-current="page" @endif>
-            <x-icon name="home" />
-            Home
-        </a>
-
         <div>
-            <div class="mb-1 flex items-center justify-between pr-1 pl-3">
+            <div class="mb-1 flex items-center justify-between pr-1 pl-3 border-b border-neutral-200">
                 {{-- カテゴリの一覧の画面はないので、見出しはリンクにしない --}}
-                <p class="text-xs font-medium tracking-wide text-neutral-500 uppercase">Categories</p>
+                <p class="text-sm font-medium tracking-wide text-neutral-700 uppercase">
+                    Categories</p>
                 <a href="{{ route('categories.create') }}"
                     class="flex size-8 items-center justify-center rounded-lg text-neutral-500 hover:bg-neutral-100 hover:text-neutral-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink">
                     <x-icon name="plus" label="New category" class="size-4" />

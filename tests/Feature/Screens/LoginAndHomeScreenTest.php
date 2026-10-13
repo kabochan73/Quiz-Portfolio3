@@ -7,8 +7,8 @@ use App\Models\User;
 test('ログイン画面に、メールアドレス・パスワード・ログインボタンを出す', function () {
     $this->get('/login')
         ->assertOk()
-        ->assertSee('<title>Log in | recollect</title>', false)
-        ->assertSeeInOrder(['recollect', 'A study notebook graded by AI', 'Email', 'Password', 'Log in'])
+        ->assertSee('<title>Log in | Recollect</title>', false)
+        ->assertSeeInOrder(['Recollect', 'A study notebook graded by AI', 'Email', 'Password', 'Log in'])
         ->assertSee('action="'.route('login.store').'"', false)
         ->assertSee('name="_token"', false)
         ->assertSee('type="password"', false);
@@ -48,15 +48,9 @@ test('ホームには、New category ボタンだけを置く', function () {
     $this->actingAs(User::factory()->create())
         ->get('/home')
         ->assertOk()
-        ->assertSee('<title>Home | recollect</title>', false)
+        ->assertSee('<title>Home | Recollect</title>', false)
         ->assertSee('href="'.route('categories.create').'"', false)
         ->assertSee('New category');
-});
-
-test('ホームを開いているときは、サイドバーのホームを強調する', function () {
-    $this->actingAs(User::factory()->create())
-        ->get('/home')
-        ->assertSeeInOrder([route('home'), 'bg-neutral-100 font-semibold', 'aria-current="page"', 'Home'], false);
 });
 
 test('ログインすると、ホームが表示される', function () {
@@ -66,5 +60,5 @@ test('ログインすると、ホームが表示される', function () {
     $this->followingRedirects()
         ->post('/login', ['email' => 'admin@example.com', 'password' => 'secret-pass'])
         ->assertOk()
-        ->assertSee('<title>Home | recollect</title>', false);
+        ->assertSee('<title>Home | Recollect</title>', false);
 });

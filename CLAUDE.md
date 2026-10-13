@@ -1,4 +1,4 @@
-# recollect(Quiz-Portfolio3)
+# Recollect(Quiz-Portfolio3)
 
 自由記述の解答を Claude API が採点する、個人用の学習アプリ(ポートフォリオ v3)。v2(Quiz-Portfolio2)の要件・設計・構成を引き継ぎ、コードをスクラッチで作り直している。v3 での変更点(画面の英語化・白黒のデザイン・ホーム画面・デプロイなど)は requirements.md 9章の決定事項にまとめてある。
 

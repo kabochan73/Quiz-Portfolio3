@@ -19,25 +19,25 @@ function onRoute(string $name, array $parameters = []): void
     request()->setRouteResolver(fn () => $route);
 }
 
-test('タイトルは「ページ名 | recollect」で、ページは英語', function () {
+test('タイトルは「ページ名 | Recollect」で、ページは英語', function () {
     // design-guide.md 8章、requirements.md 5.5
     $this->blade('<x-layouts.app title="Categories">Body</x-layouts.app>')
         ->assertSee('<html lang="en">', false)
-        ->assertSee('<title>Categories | recollect</title>', false);
+        ->assertSee('<title>Categories | Recollect</title>', false);
 });
 
 test('タイトルを渡さなければ、アプリ名だけにする', function () {
     $this->blade('<x-layouts.minimal>Body</x-layouts.minimal>')
-        ->assertSee('<title>recollect</title>', false);
+        ->assertSee('<title>Recollect</title>', false);
 });
 
-test('サイドバーに、ホーム・カテゴリの一覧・カテゴリ作成・ログアウトを出す', function () {
+test('サイドバーに、ロゴ(ホームへ)・カテゴリの一覧・カテゴリ作成・ログアウトを出す', function () {
     $first = Category::factory()->create(['name' => '基本情報']);
     $second = Category::factory()->create(['name' => 'Laravel']);
 
     $this->blade('<x-layouts.app title="Categories">Body</x-layouts.app>')
         ->assertSeeInOrder([
-            route('home'), 'Home',
+            route('home'), 'Recollect',
             'Categories',
             route('categories.create'), 'New category',
             route('categories.show', $first), '基本情報',
@@ -57,11 +57,13 @@ test('PC 用とスマホのドロワー用に、サイドバーを2つ出す', f
         ->toContain('x-trap.noscroll="drawerOpen"');
 });
 
-test('ホームを開いているときは、ホームを強調する', function () {
+test('サイドバーに Home のリンクは置かない。ホームへはロゴから移る', function () {
+    // 2026-10-13 決定: ロゴと役割が重なるため
     onRoute('home');
 
     $this->blade('<x-layouts.app>Body</x-layouts.app>')
-        ->assertSeeInOrder([route('home'), 'bg-neutral-100 font-semibold', 'aria-current="page"', 'Home'], false);
+        ->assertDontSee('>Home<', false)
+        ->assertDontSee('aria-current="page"', false);
 });
 
 test('今いるページが属するカテゴリを強調し、ほかは強調しない', function () {

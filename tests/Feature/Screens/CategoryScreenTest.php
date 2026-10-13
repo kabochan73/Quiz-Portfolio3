@@ -19,7 +19,7 @@ test('カテゴリの一覧の画面はない。一覧はサイドバーに任�
 test('作成画面に、名前の入力欄と Create ボタンを出す', function () {
     $this->get('/categories/create')
         ->assertOk()
-        ->assertSee('<title>New category | recollect</title>', false)
+        ->assertSee('<title>New category | Recollect</title>', false)
         ->assertSeeInOrder(['Home', 'New category', 'Name', 'Cancel', 'Create'])
         ->assertSee('action="'.route('categories.store').'"', false)
         ->assertSee('max-w-2xl', false);
@@ -52,7 +52,7 @@ test('カテゴリ詳細に、セクションを行で並べ、問題数を出�
 
     $this->get("/categories/{$category->id}")
         ->assertOk()
-        ->assertSee('<title>基本情報 | recollect</title>', false)
+        ->assertSee('<title>基本情報 | Recollect</title>', false)
         ->assertSeeInOrder([
             'Sections', 'Add section',
             'href="'.route('sections.show', $network).'"', 'ネットワーク', '2 questions',

@@ -1,6 +1,6 @@
 {{--
     <head> の中身。layouts/app と layouts/minimal で共通。
-    タイトルは「ページ名 | recollect」の形(design-guide.md 8章、screens.md 4.2)。
+    タイトルは「ページ名 | Recollect」の形(design-guide.md 8章、screens.md 4.2)。
 --}}
 @props([
     'title' => null,

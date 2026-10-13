@@ -8,7 +8,7 @@ test('開発環境では、共通コンポーネントの見本を1画面で見�
     $this->actingAs(User::factory()->create())
         ->get('/dev/components')
         ->assertOk()
-        ->assertSee('<title>Components | recollect</title>', false)
+        ->assertSee('<title>Components | Recollect</title>', false)
         ->assertSeeInOrder(['Colors', 'Typography', 'Buttons', 'Form fields', 'Badges', 'Cards', 'Feedback', 'Icons'])
         // 入力欄のエラーの見本
         ->assertSee('The name field is required.');
