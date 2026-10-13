@@ -46,7 +46,8 @@ class HistoryController extends Controller
         WeakQuestions $weakQuestions,
         CostCalculator $costs,
     ): View {
-        $attempt->load(['answers.question', 'answers.score']);
+        // 問題文は回答の写し(question_body)を使うので、問題は読まない(architecture.md 2.5)
+        $attempt->load('answers.score');
         $questionIds = $attempt->answers->pluck('question_id');
 
         return view('history.show', [

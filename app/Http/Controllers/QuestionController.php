@@ -46,8 +46,6 @@ class QuestionController extends Controller
         return view('questions.edit', [
             'question' => $question->load('section.category'),
             'number' => $this->numberOf($question),
-            // 削除の確認モーダルで、一緒に消える回答の件数を出す(screens.md 2.7)
-            'answerCount' => $question->answers()->count(),
         ]);
     }
 

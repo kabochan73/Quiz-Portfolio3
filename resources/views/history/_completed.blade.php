@@ -2,6 +2,7 @@
     採点完了(screens.md 2.10 (b))。
     平均点と前回比、問題ごとのフィードバック(良かった点 / 悪かった点 / 模範解答)を並べる。
     問題のカードは、最初から全部開いておく(2026-10-13 決定)。見出しの行を押すと閉じられる。
+    問題文は、回答したときの写し(question_body)を出す。あとから問題を消したり書き直したりしても変わらない(architecture.md 2.5)。
 --}}
 @php
     $scoreOf = fn ($answer) => $answer->score?->score;
@@ -56,7 +57,7 @@
 
                 <div x-show="open" x-collapse>
                     <div class="space-y-5 border-t border-neutral-200 px-4 py-4 lg:px-5">
-                        <p class="text-body whitespace-pre-wrap text-neutral-900" lang="ja">{{ $answer->question->body }}</p>
+                        <p class="text-body whitespace-pre-wrap text-neutral-900" lang="ja">{{ $answer->question_body }}</p>
 
                         <div>
                             <p class="mb-1 text-xs font-medium text-neutral-500">Your answer</p>

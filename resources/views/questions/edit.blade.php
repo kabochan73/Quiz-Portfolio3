@@ -20,8 +20,8 @@
         'deleteModal' => 'delete-question',
     ])
 
-    {{-- 削除の確認。回答が0件になった挑戦も一緒に消える(architecture.md 4.6)。フォームの中にフォームは置けないので、ここに置く --}}
+    {{-- 削除の確認。問題を消しても履歴は残る(architecture.md 4.6)。フォームの中にフォームは置けないので、ここに置く --}}
     <x-ui.confirm-modal name="delete-question" title="Delete this question?" :action="route('questions.destroy', $question)">
-        This will also delete {{ $answerCount }} {{ Str::plural('answer', $answerCount) }}.
+        Your history will be kept.
     </x-ui.confirm-modal>
 </x-layouts.app>

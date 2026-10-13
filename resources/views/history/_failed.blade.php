@@ -25,12 +25,12 @@
                 x-bind:aria-expanded="open"
             >
                 <span class="shrink-0 text-sm font-medium text-neutral-900">Question {{ $loop->iteration }}</span>
-                <span class="min-w-0 flex-1 truncate text-sm text-neutral-500" lang="ja">{{ Str::squish($answer->question->body) }}</span>
+                <span class="min-w-0 flex-1 truncate text-sm text-neutral-500" lang="ja">{{ Str::squish($answer->question_body) }}</span>
                 <x-icon name="chevron-down" class="size-4 text-neutral-400 transition-transform duration-200" x-bind:class="open && 'rotate-180'" />
             </button>
             <div x-cloak x-show="open" x-collapse>
                 <div class="space-y-4 border-t border-neutral-200 px-4 py-4 lg:px-5">
-                    <p class="text-body whitespace-pre-wrap text-neutral-900" lang="ja">{{ $answer->question->body }}</p>
+                    <p class="text-body whitespace-pre-wrap text-neutral-900" lang="ja">{{ $answer->question_body }}</p>
                     <div>
                         <p class="mb-1 text-xs font-medium text-neutral-500">Your answer</p>
                         <blockquote class="text-body border-l-2 border-neutral-200 pl-3 whitespace-pre-wrap text-neutral-700" lang="ja">{{ $answer->body }}</blockquote>

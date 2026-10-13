@@ -118,6 +118,27 @@ test('問題のカードは、点数にかかわらず最初から全部開い�
         ->and($html)->not->toContain('open: false');
 });
 
+test('問題をあとから書き直したり消したりしても、結果画面には回答したときの問題文を出す', function () {
+    // architecture.md 2.5 / 4.6(2026-10-13 決定)
+    $attempt = scoredAttempt($this->section, [$this->q1->id => 85, $this->q2->id => 40]);
+    $this->q1->update(['body' => '書き直した問題文']);
+    $this->q2->delete();
+
+    $this->get(resultUrl($this->section, $attempt))
+        ->assertOk()
+        ->assertSeeInOrder(['Question 1', 'TCPとUDPの違いは?', 'Question 2', 'DNSとは?'])
+        ->assertDontSee('書き直した問題文');
+});
+
+test('問題を消したあとでも、採点に失敗した挑戦の回答一覧を出せる', function () {
+    $attempt = unscoredAttempt($this->section, [$this->q1, $this->q2], AttemptStatus::Failed);
+    $this->q1->delete();
+
+    $this->get(resultUrl($this->section, $attempt))
+        ->assertOk()
+        ->assertSeeInOrder(['Your answers (2)', 'TCPとUDPの違いは?', 'DNSとは?']);
+});
+
 test('使用量を一番下に小さく出す。単価が設定されていればコストも出す', function () {
     config([
         'quiz.pricing' => ['claude-sonnet-5-5' => ['input_per_mtok' => '2', 'output_per_mtok' => '10']],
