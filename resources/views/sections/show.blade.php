@@ -54,27 +54,21 @@
             @if ($count === 0)
                 <x-ui.empty-state message="No questions yet." action="Add question" :action-href="route('sections.questions.create', $section)" />
             @else
-                <x-ui.card :padding="false" class="divide-y divide-neutral-200">
+                <x-ui.card :padding="false" class="divide-y divide-neutral-200 overflow-hidden">
                     @foreach ($questions as $question)
-                        <div class="flex items-center gap-1 pr-2">
-                            {{-- 行を押すと問題の編集へ(問題の詳細の画面はない。2026-10-13 決定)。「…」メニューはリンクの外に置く(リンクの中にボタンを入れない) --}}
-                            <a
-                                href="{{ route('questions.edit', $question) }}"
-                                class="flex min-h-14 min-w-0 flex-1 items-center gap-3 py-3 pl-4 transition-colors duration-150 hover:bg-neutral-50 focus-visible:bg-neutral-50 focus-visible:outline-none lg:pl-5"
-                            >
-                                <span class="w-5 shrink-0 text-sm text-neutral-500 tabular-nums">{{ $loop->iteration }}</span>
-                                {{--
-                                    問題文の先頭40文字(screens.md 2.6)。Str::limit() は表示幅で数え、全角を2文字として扱うので使わない。
-                                    改行は1行に収めるため空白にする
-                                --}}
-                                <span class="min-w-0 flex-1 truncate text-sm text-neutral-900" lang="ja">{{ Str::length($question->body) > 40 ? Str::substr(Str::squish($question->body), 0, 40).'…' : Str::squish($question->body) }}</span>
-                            </a>
-
-                            <x-ui.dropdown label="Actions for question {{ $loop->iteration }}">
-                                <x-ui.dropdown-item :href="route('questions.edit', $question)">Edit</x-ui.dropdown-item>
-                                <x-ui.dropdown-item variant="danger" x-on:click="$dispatch('open-modal', 'delete-question-{{ $question->id }}')">Delete</x-ui.dropdown-item>
-                            </x-ui.dropdown>
-                        </div>
+                        {{-- 行を押すと問題の編集へ。削除も編集画面から行う(問題の詳細の画面はない。2026-10-13 決定) --}}
+                        <a
+                            href="{{ route('questions.edit', $question) }}"
+                            class="flex min-h-14 items-center gap-3 px-4 py-3 transition-colors duration-150 hover:bg-neutral-50 focus-visible:bg-neutral-50 focus-visible:outline-none lg:px-5"
+                        >
+                            <span class="w-5 shrink-0 text-sm text-neutral-500 tabular-nums">{{ $loop->iteration }}</span>
+                            {{--
+                                問題文の先頭40文字(screens.md 2.6)。Str::limit() は表示幅で数え、全角を2文字として扱うので使わない。
+                                改行は1行に収めるため空白にする
+                            --}}
+                            <span class="min-w-0 flex-1 truncate text-sm text-neutral-900" lang="ja">{{ Str::length($question->body) > 40 ? Str::substr(Str::squish($question->body), 0, 40).'…' : Str::squish($question->body) }}</span>
+                            <x-icon name="chevron-right" class="size-4 text-neutral-400" />
+                        </a>
                     @endforeach
                 </x-ui.card>
             @endif
@@ -86,9 +80,4 @@
         This will also delete {{ $plural($deletionCounts['questions'], 'question') }} and {{ $plural($deletionCounts['attempts'], 'attempt') }}.
     </x-ui.confirm-modal>
 
-    @foreach ($questions as $question)
-        <x-ui.confirm-modal name="delete-question-{{ $question->id }}" title="Delete this question?" :action="route('questions.destroy', $question)">
-            This will also delete {{ $plural($question->answers_count, 'answer') }}.
-        </x-ui.confirm-modal>
-    @endforeach
 </x-layouts.app>

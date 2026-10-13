@@ -2,6 +2,7 @@
     ボタン(design-guide.md 7.1)。
     href を渡すとリンク(<a>)、渡さないと <button> として出す。
     variant: primary(画面の主操作。原則1画面に1つ)/ secondary(副操作)/ ghost(控えめな操作)/ danger(確認モーダル内の削除だけ)
+             danger-ghost(削除の確認モーダルを開くボタン。背景なし・赤い文字)
     size: md(押しやすい高さ 44px、PC では 40px)/ sm(32px。一覧の中など)
 --}}
 @props([
@@ -24,6 +25,7 @@
         match ($variant) {
             'secondary' => 'border border-neutral-300 bg-white text-neutral-700 hover:bg-neutral-100',
             'ghost' => 'text-neutral-600 hover:bg-neutral-100',
+            'danger-ghost' => 'text-rose-600 hover:bg-rose-50',
             'danger' => 'bg-rose-600 text-white hover:bg-rose-700',
             default => 'bg-ink text-white hover:bg-ink-hover',
         },

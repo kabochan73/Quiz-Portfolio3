@@ -30,8 +30,7 @@ class SectionController extends Controller
 
     public function show(Section $section, WeakQuestions $weakQuestions): View
     {
-        // 各行の「…」から問題を削除するときの確認モーダルに、一緒に消える回答の件数を出す(screens.md 2.8)
-        $questions = $section->questions()->withCount('answers')->get();
+        $questions = $section->questions()->get();
 
         return view('sections.show', [
             'section' => $section->load('category'),

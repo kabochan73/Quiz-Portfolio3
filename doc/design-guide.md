@@ -150,6 +150,7 @@ Blade の匿名コンポーネントとして `resources/views/components/ui/` �
 | `secondary` | 白背景・`neutral-300` 枠・`neutral-700` 文字 | 副操作 |
 | `ghost` | 背景なし・`neutral-600` 文字、ホバー時に `neutral-100` | ツールバー、控えめな操作 |
 | `danger` | `rose-600` 背景・白文字 | 確認モーダル内の削除実行のみ |
+| `danger-ghost` | 背景なし・`rose-600` 文字、ホバー時に `rose-50` | 削除の確認モーダルを開くボタン(問題の編集画面の Delete など。v3 で追加) |
 
 - サイズは `md`(既定: 高さ 44px / PC 40px)と `sm`(高さ 32px。表の中など)
 - `href` を渡すと `<a>`、渡さないと `<button>` として出力する

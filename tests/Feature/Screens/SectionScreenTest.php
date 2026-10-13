@@ -98,18 +98,27 @@ test('問題が0問なら、操作のエリアを出さず、空の状態から�
         ->assertDontSee('History');
 });
 
-test('セクションと各問題の削除の確認モーダルに、一緒に消えるものの件数を出す', function () {
+test('セクションの削除の確認モーダルに、一緒に消えるものの件数を出す', function () {
     [$q1, $q2] = Question::factory()->count(2)->for($this->section)->create();
     scoredAttempt($this->section, [$q1->id => 80, $q2->id => 80]);
     scoredAttempt($this->section, [$q1->id => 90]);
 
     $this->get("/sections/{$this->section->id}")
         ->assertSee('Delete this section?')
-        ->assertSee('This will also delete 2 questions and 2 attempts.')
-        ->assertSeeInOrder([
-            'delete-question-'.$q1->id, 'Delete this question?', 'This will also delete 2 answers.',
-            'delete-question-'.$q2->id, 'Delete this question?', 'This will also delete 1 answer.',
-        ], false);
+        ->assertSee('This will also delete 2 questions and 2 attempts.');
+});
+
+test('問題の行は「›」で編集画面へ移る。行ごとのメニューや削除の確認は置かない', function () {
+    // 2026-10-13 決定: 問題の削除は編集画面から行う
+    Question::factory()->count(2)->for($this->section)->create();
+
+    $html = (string) $this->get("/sections/{$this->section->id}")->getContent();
+
+    // 「…」メニューはセクションの見出しの1つだけ
+    expect(substr_count($html, 'aria-haspopup="menu"'))->toBe(1)
+        ->and($html)->not->toContain('delete-question')
+        ->not->toContain('Delete this question?')
+        ->toContain('m8.25 4.5 7.5 7.5-7.5 7.5');
 });
 
 test('セクション詳細では、サイドバーの所属するカテゴリを強調する', function () {

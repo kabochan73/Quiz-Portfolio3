@@ -27,6 +27,7 @@ test('variant ごとに見た目を変える', function (string $variant, string
     'secondary は白に枠' => ['secondary', 'border-neutral-300'],
     'ghost は背景なし' => ['ghost', 'text-neutral-600'],
     'danger は赤' => ['danger', 'bg-rose-600'],
+    'danger-ghost は赤い文字だけ' => ['danger-ghost', 'text-rose-600'],
 ]);
 
 test('押しやすい高さを確保する。sm は一覧の中用に小さくする', function () {

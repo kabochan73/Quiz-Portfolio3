@@ -47,6 +47,26 @@ test('編集画面は、今の問題文を入れた状態で開き、Cancel で�
         ->assertSee('Save');
 });
 
+test('編集画面の Delete から、一緒に消える回答の件数を出した確認モーダルを開く', function () {
+    // 2026-10-13 決定: 問題の削除は編集画面から行う
+    $question = Question::factory()->for($this->section)->create();
+    scoredAttempt($this->section, [$question->id => 80]);
+    scoredAttempt($this->section, [$question->id => 90]);
+
+    $this->get("/questions/{$question->id}/edit")
+        ->assertSeeInOrder([
+            "\$dispatch('open-modal', 'delete-question')", 'Delete', 'Cancel', 'Save',
+            'Delete this question?', 'This will also delete 2 answers.',
+        ], false)
+        ->assertSee('action="'.route('questions.destroy', $question).'"', false)
+        ->assertSee('text-rose-600', false);
+});
+
+test('追加画面には Delete を出さない', function () {
+    $this->get("/sections/{$this->section->id}/questions/create")
+        ->assertDontSee('Delete');
+});
+
 test('問題の詳細の画面はない。問題の一覧・編集・削除はセクション詳細から行う', function () {
     // 2026-10-13 決定
     $question = Question::factory()->for($this->section)->create();
