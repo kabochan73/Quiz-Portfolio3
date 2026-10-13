@@ -31,8 +31,9 @@ Route::middleware('auth')->group(function () {
     // 作成は /categories/{category}/sections、それ以外は /sections/{section}(requirements.md 6章)。
     // セクション一覧はカテゴリ詳細にあるので、index は作らない
     Route::resource('categories.sections', SectionController::class)->shallow()->except('index');
-    // 作成は /sections/{section}/questions、それ以外は /questions/{question}(requirements.md 6章)
-    Route::resource('sections.questions', QuestionController::class)->shallow()->except('index');
+    // 作成は /sections/{section}/questions、それ以外は /questions/{question}(requirements.md 6章)。
+    // 問題の一覧はセクション詳細にあり、問題の詳細の画面は作らない(2026-10-13 決定)ので、index と show は作らない
+    Route::resource('sections.questions', QuestionController::class)->shallow()->except(['index', 'show']);
 
     Route::get('/sections/{section}/answers/create', [AnswerController::class, 'create'])->name('sections.answers.create');
     Route::post('/sections/{section}/answers', [AnswerController::class, 'store'])->name('sections.answers.store');

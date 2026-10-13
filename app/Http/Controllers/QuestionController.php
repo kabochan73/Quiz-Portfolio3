@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Enums\AttemptStatus;
 use App\Http\Requests\QuestionRequest;
 use App\Models\Question;
 use App\Models\Section;
@@ -13,8 +12,9 @@ use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 
 /**
- * 問題の作成・詳細・編集・削除(requirements.md 3.2、screens.md 2.7 / 2.8)。
+ * 問題の作成・編集・削除(requirements.md 3.2、screens.md 2.7)。
  * 所属するセクションは作成時の URL で決まり、あとから変えられない。
+ * 問題の詳細の画面は作らない。問題の一覧・編集・削除はセクション詳細から行う(2026-10-13 決定)。
  */
 class QuestionController extends Controller
 {
@@ -41,26 +41,6 @@ class QuestionController extends Controller
             ->with('toast', ['type' => 'success', 'message' => 'Question created.']);
     }
 
-    public function show(Question $question): View
-    {
-        // 採点が終わった直近の回答(screens.md 2.8)。各行から、その回の結果画面へ移れるよう挑戦も読む
-        $recentAnswers = $question->answers()
-            ->whereHas('attempt', fn ($query) => $query->where('status', AttemptStatus::Completed))
-            ->with(['score', 'attempt'])
-            ->orderByDesc('attempt_id')
-            // 回答は直近の保持件数(既定10件)しか残らないので、表示も同じ件数にそろえる(screens.md 2.8)
-            ->limit(config('quiz.answer_retention_limit'))
-            ->get();
-
-        return view('questions.show', [
-            'question' => $question->load('section.category'),
-            'number' => $this->numberOf($question),
-            'recentAnswers' => $recentAnswers,
-            // 削除の確認モーダルで、一緒に消える回答の件数を出す(screens.md 2.8)
-            'answerCount' => $question->answers()->count(),
-        ]);
-    }
-
     public function edit(Question $question): View
     {
         return view('questions.edit', [
@@ -73,7 +53,8 @@ class QuestionController extends Controller
     {
         $question->update($request->validated());
 
-        return redirect()->route('questions.show', $question)
+        // 問題の詳細の画面はないので、セクション詳細へ戻る(2026-10-13 決定)
+        return redirect()->route('sections.show', $question->section_id)
             ->with('toast', ['type' => 'success', 'message' => 'Question saved.']);
     }
 

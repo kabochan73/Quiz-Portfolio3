@@ -57,9 +57,9 @@
                 <x-ui.card :padding="false" class="divide-y divide-neutral-200">
                     @foreach ($questions as $question)
                         <div class="flex items-center gap-1 pr-2">
-                            {{-- 行を押すと問題詳細へ。「…」メニューはリンクの外に置く(リンクの中にボタンを入れない) --}}
+                            {{-- 行を押すと問題の編集へ(問題の詳細の画面はない。2026-10-13 決定)。「…」メニューはリンクの外に置く(リンクの中にボタンを入れない) --}}
                             <a
-                                href="{{ route('questions.show', $question) }}"
+                                href="{{ route('questions.edit', $question) }}"
                                 class="flex min-h-14 min-w-0 flex-1 items-center gap-3 py-3 pl-4 transition-colors duration-150 hover:bg-neutral-50 focus-visible:bg-neutral-50 focus-visible:outline-none lg:pl-5"
                             >
                                 <span class="w-5 shrink-0 text-sm text-neutral-500 tabular-nums">{{ $loop->iteration }}</span>

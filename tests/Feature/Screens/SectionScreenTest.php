@@ -72,8 +72,9 @@ test('問題を並べ、問題文の先頭40文字を出す。点数は出さな
 
     $this->get("/sections/{$this->section->id}")
         ->assertSeeInOrder([
-            'href="'.route('questions.show', $long).'"', '1', str_repeat('あ', 40).'…',
-            'href="'.route('questions.show', $short).'"', '2', 'DNSとは?',
+            // 行を押すと、問題の編集へ移る(問題の詳細の画面はない。2026-10-13 決定)
+            'href="'.route('questions.edit', $long).'"', '1', str_repeat('あ', 40).'…',
+            'href="'.route('questions.edit', $short).'"', '2', 'DNSとは?',
         ], false)
         // 2026-10-13 決定: 点数は履歴だけで見る
         ->assertDontSee('>85</span>', false)

@@ -42,7 +42,7 @@ test('問題文を変更できる。所属するセクションは変えられ�
     $other = Section::factory()->create();
 
     $this->put("/questions/{$question->id}", ['body' => 'Edited?', 'section_id' => $other->id])
-        ->assertRedirect(route('questions.show', $question))
+        ->assertRedirect(route('sections.show', $this->section))
         ->assertSessionHas('toast', ['type' => 'success', 'message' => 'Question saved.']);
 
     expect($question->fresh()->only('section_id', 'body'))
