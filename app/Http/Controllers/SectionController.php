@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Http\Requests\SectionRequest;
 use App\Models\Category;
 use App\Models\Section;
-use App\Queries\LatestScores;
 use App\Queries\WeakQuestions;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
@@ -29,15 +28,14 @@ class SectionController extends Controller
             ->with('toast', ['type' => 'success', 'message' => 'Section created.']);
     }
 
-    public function show(Section $section, LatestScores $latestScores, WeakQuestions $weakQuestions): View
+    public function show(Section $section, WeakQuestions $weakQuestions): View
     {
-        $questions = $section->questions()->get();
+        // 各行の「…」から問題を削除するときの確認モーダルに、一緒に消える回答の件数を出す(screens.md 2.8)
+        $questions = $section->questions()->withCount('answers')->get();
 
         return view('sections.show', [
             'section' => $section->load('category'),
             'questions' => $questions,
-            // 問題ごとの最新の点数バッジ(requirements.md 3.4)
-            'latestScores' => $latestScores->forQuestions($questions->modelKeys()),
             // 「苦手だけ再挑戦」のボタンに出す問題数。0問ならボタンを無効にする(screens.md 2.6)
             'weakCount' => count($weakQuestions->idsFor($section)),
             // 上限に達したら「問題を追加」を無効にする(screens.md 2.6)
