@@ -1,6 +1,6 @@
 {{--
     アイコン(design-guide.md 6章)。Heroicons(Outline)の SVG を埋め込む(外部の CDN から読み込まない)。
-    色は文字色に合わせる(currentColor)。大きさの既定は 20px(size-5)。
+    色は文字色に合わせる(currentColor)。大きさの既定は 20px(size-5)。class で size-4 などを渡すと、その大きさになる。
     アイコンだけで意味を伝えるときは label を渡す(読み上げソフト向け)。渡さなければ飾りとして読み上げない。
     使うアイコンだけをここに足していく。
 --}}
@@ -36,5 +36,6 @@
     stroke-width="1.5"
     stroke="currentColor"
     @if ($label !== null) role="img" aria-label="{{ $label }}" @else aria-hidden="true" @endif
-    {{ $attributes->class('size-5 shrink-0') }}
+    {{-- 大きさ(size-4 など)を渡されたら、既定の size-5 は付けない(両方あると、どちらが効くかが CSS の並び順任せになる) --}}
+    {{ $attributes->class(['shrink-0', 'size-5' => ! str_contains((string) $attributes->get('class'), 'size-')]) }}
 ><path stroke-linecap="round" stroke-linejoin="round" d="{{ $path }}" /></svg>

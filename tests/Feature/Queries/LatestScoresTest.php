@@ -22,7 +22,8 @@ test('新旧は日時ではなく挑戦の ID で決める', function () {
     $older = scoredAttempt($this->section, [$this->q1->id => 40]);
     scoredAttempt($this->section, [$this->q1->id => 75]);
     // 古い挑戦の日時があとになっていても、ID が小さいほうが古い(architecture.md 2.7)
-    $older->update(['created_at' => now()->addDay()]);
+    // created_at は一括代入できないので、forceFill で書き換える(update では黙って無視される)
+    $older->forceFill(['created_at' => now()->addDay()])->save();
 
     expect((new LatestScores)->forQuestions([$this->q1->id]))->toBe([$this->q1->id => 75]);
 });

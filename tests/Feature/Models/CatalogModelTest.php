@@ -28,7 +28,8 @@ test('セクションの問題は作成順に並ぶ', function () {
     $first = Question::factory()->for($section)->create();
     $second = Question::factory()->for($section)->create();
     // 作成日時が前後しても、番号は作成順(ID 順)のまま(architecture.md 2.7)
-    $first->update(['created_at' => now()->addDay()]);
+    // created_at は一括代入できないので、forceFill で書き換える(update では黙って無視される)
+    $first->forceFill(['created_at' => now()->addDay()])->save();
 
     expect($section->questions->pluck('id')->all())->toBe([$first->id, $second->id]);
 });

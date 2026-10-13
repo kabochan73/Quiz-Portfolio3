@@ -66,3 +66,9 @@ test('ページ見出しの操作と補足は、なくてもよい', function ()
         ->assertSee('Categories')
         ->assertDontSee('<p', false);
 });
+
+test('アイコンの大きさを渡したら、既定の大きさは付けない', function () {
+    $this->blade('<x-icon name="plus" class="size-4" />')
+        ->assertSee('size-4', false)
+        ->assertDontSee('size-5', false);
+});
