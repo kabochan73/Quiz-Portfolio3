@@ -62,7 +62,7 @@ test('結果画面を開いたら、その回答フォームの下書きを消�
         ->assertSee("draftCleaner('quiz:draft:section:{$this->section->id}:weak')", false);
 });
 
-test('採点が終わったら、平均点・前回比・点数帯ごとの問題数を出す', function () {
+test('採点が終わったら、平均点と前回比を出す。点数帯ごとの問題数は出さない', function () {
     scoredAttempt($this->section, [$this->q1->id => 50, $this->q2->id => 60]);
     $attempt = scoredAttempt($this->section, [$this->q1->id => 85, $this->q2->id => 40]);
     $attempt->forceFill(['created_at' => Carbon::parse('2026-10-08 05:32', 'UTC'), 'grading_level' => GradingLevel::Strict])->save();
@@ -72,17 +72,22 @@ test('採点が終わったら、平均点・前回比・点数帯ごとの問�
         ->assertSee('<title>Results | Recollect</title>', false)
         ->assertSeeInOrder([
             'History', 'Oct 8, 14:32',
-            'Results', '>All</span>', '>Strict</span>', 'Oct 8, 14:32',
+            'Results', '>All</span>', '>Strict</span>',
             'Average', '>63</p>', '>▲8</span>',
-            '1 of 2 scored 80+', '1 under 60',
-        ], false);
+        ], false)
+        // 2026-10-13 決定: 日時はパンくずだけに出し、見出しの下には出さない
+        ->assertDontSee('<time', false)
+        // 2026-10-13 決定: 点数帯ごとの問題数は出さない
+        ->assertDontSee('scored 80+')
+        ->assertDontSee('under 60');
 });
 
-test('もう一度挑戦するボタンと、苦手だけ再挑戦するボタンを出す', function () {
+test('平均点のカードの中に、もう一度挑戦するボタンと、苦手だけ再挑戦するボタンを出す', function () {
     $attempt = scoredAttempt($this->section, [$this->q1->id => 85, $this->q2->id => 40]);
 
     $this->get(resultUrl($this->section, $attempt))
         ->assertSeeInOrder([
+            'Average',
             route('sections.answers.create', [$this->section, 'mode' => 'all']), 'Try again',
             route('sections.answers.create', [$this->section, 'mode' => 'weak']), 'Retry weak (1)',
         ], false);
@@ -103,12 +108,14 @@ test('問題ごとに、点数・前回比・回答・3つのフィードバッ�
         ->assertSee('lang="ja"', false);
 });
 
-test('問題のカードは、60点未満の問題だけ最初から開いておく', function () {
+test('問題のカードは、点数にかかわらず最初から全部開いておく', function () {
+    // 2026-10-13 決定
     $attempt = scoredAttempt($this->section, [$this->q1->id => 85, $this->q2->id => 40]);
 
     $html = (string) $this->get(resultUrl($this->section, $attempt))->getContent();
 
-    expect($html)->toMatch('/open: false.*Question 1.*open: true.*Question 2/s');
+    expect(substr_count($html, 'x-data="{ open: true }"'))->toBe(2)
+        ->and($html)->not->toContain('open: false');
 });
 
 test('使用量を一番下に小さく出す。単価が設定されていればコストも出す', function () {

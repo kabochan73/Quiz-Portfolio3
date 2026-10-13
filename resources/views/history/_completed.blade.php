@@ -1,13 +1,10 @@
 {{--
     採点完了(screens.md 2.10 (b))。
-    平均点と前回比、点数帯ごとの問題数、問題ごとのフィードバック(良かった点 / 悪かった点 / 模範解答)を並べる。
-    問題のカードは、見直すべき苦手(60点未満)のものだけ最初から開いておく。
+    平均点と前回比、問題ごとのフィードバック(良かった点 / 悪かった点 / 模範解答)を並べる。
+    問題のカードは、最初から全部開いておく(2026-10-13 決定)。見出しの行を押すと閉じられる。
 --}}
 @php
-    $total = $attempt->answers->count();
     $scoreOf = fn ($answer) => $answer->score?->score;
-    $weakAnswers = $attempt->answers->filter(fn ($answer) => $scoreOf($answer) !== null && $scoreOf($answer) < $weakThreshold)->count();
-    $retryMode = $attempt->mode->value;
 @endphp
 
 <x-ui.page-header title="Results">
@@ -15,10 +12,10 @@
         <x-ui.badge>{{ $attempt->mode->label() }}</x-ui.badge>
         <x-ui.badge>{{ $attempt->grading_level->label() }}</x-ui.badge>
     </x-slot:actions>
-    <x-slot:description><x-ui.datetime :value="$attempt->created_at" format="long" /></x-slot:description>
 </x-ui.page-header>
 
 <div class="space-y-8">
+    {{-- 平均点の右に、もう一度挑戦するボタンを並べる。スマホで幅が足りなければ、ボタンは平均点の下に回る(2026-10-13) --}}
     <x-ui.card class="flex flex-wrap items-end justify-between gap-4">
         <div>
             <p class="text-sm text-neutral-500">Average</p>
@@ -30,26 +27,21 @@
                 @endif
             </div>
         </div>
-        <div class="space-y-0.5 text-right text-sm text-neutral-600 tabular-nums">
-            <p>{{ $highScoreCount }} of {{ $total }} scored 80+</p>
-            <p>{{ $weakAnswers }} under {{ $weakThreshold }}</p>
+
+        <div class="flex flex-wrap gap-2">
+            <x-ui.button :href="route('sections.answers.create', [$section, 'mode' => 'all'])">Try again</x-ui.button>
+            <x-ui.button variant="secondary" :href="route('sections.answers.create', [$section, 'mode' => 'weak'])" :disabled="$weakCount === 0">
+                Retry weak ({{ $weakCount }})
+            </x-ui.button>
         </div>
     </x-ui.card>
-
-    <div class="flex flex-wrap gap-2">
-        <x-ui.button :href="route('sections.answers.create', [$section, 'mode' => 'all'])">Try again</x-ui.button>
-        <x-ui.button variant="secondary" :href="route('sections.answers.create', [$section, 'mode' => 'weak'])" :disabled="$weakCount === 0">
-            Retry weak ({{ $weakCount }})
-        </x-ui.button>
-    </div>
 
     <div class="space-y-3">
         @foreach ($attempt->answers as $answer)
             @php
                 $score = $scoreOf($answer);
-                $isWeak = $score !== null && $score < $weakThreshold;
             @endphp
-            <x-ui.card :padding="false" x-data="{ open: {{ $isWeak ? 'true' : 'false' }} }">
+            <x-ui.card :padding="false" x-data="{ open: true }">
                 <button
                     type="button"
                     class="flex min-h-12 w-full items-center gap-3 px-4 py-3 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink lg:px-5"
@@ -62,7 +54,7 @@
                     <x-icon name="chevron-down" class="size-4 text-neutral-400 transition-transform duration-200" x-bind:class="open && 'rotate-180'" />
                 </button>
 
-                <div @if (! $isWeak) x-cloak @endif x-show="open" x-collapse>
+                <div x-show="open" x-collapse>
                     <div class="space-y-5 border-t border-neutral-200 px-4 py-4 lg:px-5">
                         <p class="text-body whitespace-pre-wrap text-neutral-900" lang="ja">{{ $answer->question->body }}</p>
 

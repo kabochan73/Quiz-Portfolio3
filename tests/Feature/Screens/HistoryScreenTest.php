@@ -24,7 +24,9 @@ test('挑戦を新しい順に並べ、種別・採点レベル・問題数・�
     $this->get("/sections/{$this->section->id}/history")
         ->assertOk()
         ->assertSee('<title>History | Recollect</title>', false)
-        ->assertSeeInOrder(['ネットワーク', 'History', '2 attempts'])
+        ->assertSeeInOrder(['ネットワーク', 'History'])
+        // 2026-10-13 決定: 見出しの下に件数は出さない
+        ->assertDontSee('2 attempts')
         ->assertSeeInOrder([
             route('sections.history.show', [$this->section, $new]), '>Weak</span>', 'Strict', '1 question', '>40</span>',
             route('sections.history.show', [$this->section, $old]), '>All</span>', 'Normal', '2 questions', '>72</span>',
@@ -48,8 +50,7 @@ test('20件ずつ表示し、21件以上なら Newer / Older でページを切�
     $oldest = Attempt::query()->orderBy('id')->first();
 
     $first = $this->get("/sections/{$this->section->id}/history");
-    $first->assertSee('21 attempts')
-        ->assertSee('Older')
+    $first->assertSee('Older')
         ->assertDontSee(route('sections.history.show', [$this->section, $oldest]), false);
     expect(substr_count($first->getContent(), route('sections.history.index', $this->section).'/'))->toBe(20);
 
@@ -75,7 +76,6 @@ test('別のセクションの挑戦は出さない', function () {
 
 test('まだ挑戦していなければ、空の状態から回答へ進める', function () {
     $this->get("/sections/{$this->section->id}/history")
-        ->assertSee('0 attempts')
         ->assertSee('No attempts yet.')
         ->assertSee(route('sections.answers.create', [$this->section, 'mode' => 'all']), false);
 });

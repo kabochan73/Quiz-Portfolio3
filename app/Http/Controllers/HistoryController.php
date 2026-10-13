@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Answer;
 use App\Models\Attempt;
 use App\Models\Section;
 use App\Queries\AttemptAverages;
@@ -33,7 +32,6 @@ class HistoryController extends Controller
             'attempts' => $attempts,
             // 採点が終わっていない挑戦は平均点がないので、画面では状態のバッジを出す
             'averages' => $averages->forAttempts($attempts->getCollection()->modelKeys()),
-            'total' => $section->attempts()->count(),
         ]);
     }
 
@@ -68,9 +66,6 @@ class HistoryController extends Controller
                 $attempt->output_tokens ?? 0,
                 $attempt->web_search_requests ?? 0,
             ),
-            'weakThreshold' => config('quiz.weak_threshold'),
-            // 「3 of 8 scored 80+」の数(screens.md 2.10 (b))
-            'highScoreCount' => $attempt->answers->filter(fn (Answer $answer) => ($answer->score?->score ?? 0) >= 80)->count(),
         ]);
     }
 }

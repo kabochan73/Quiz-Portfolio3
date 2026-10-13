@@ -10,9 +10,7 @@
         ['label' => 'History', 'href' => route('sections.history.index', $section)],
     ]" />
 
-    <x-ui.page-header title="History">
-        <x-slot:description>{{ $total }} {{ Str::plural('attempt', $total) }}</x-slot:description>
-    </x-ui.page-header>
+    <x-ui.page-header title="History" />
 
     @if ($attempts->isEmpty())
         <x-ui.empty-state message="No attempts yet." action="Answer all" :action-href="route('sections.answers.create', [$section, 'mode' => 'all'])" />
