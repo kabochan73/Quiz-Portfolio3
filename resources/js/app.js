@@ -1,6 +1,7 @@
 import Alpine from 'alpinejs';
 import collapse from '@alpinejs/collapse';
 import focus from '@alpinejs/focus';
+import answerForm from './answer-form';
 import toastStack from './toast';
 
 // collapse: 結果画面の問題カードなどの開閉(design-guide.md 5章 x-collapse)
@@ -8,6 +9,7 @@ import toastStack from './toast';
 Alpine.plugin(collapse);
 Alpine.plugin(focus);
 
+Alpine.data('answerForm', answerForm);
 Alpine.data('toastStack', toastStack);
 
 window.Alpine = Alpine;
