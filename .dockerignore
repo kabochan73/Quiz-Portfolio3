@@ -1,0 +1,19 @@
+# 本番用イメージに入れないもの。秘密の情報(.env)と、イメージの中で作り直すものを除く
+.env
+.env.*
+!.env.example
+.git
+.github
+node_modules
+vendor
+public/build
+public/hot
+storage/logs/*
+storage/framework/cache/data/*
+storage/framework/sessions/*
+storage/framework/views/*
+bootstrap/cache/*.php
+tests
+doc
+.phpunit.cache
+.DS_Store

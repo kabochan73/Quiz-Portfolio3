@@ -14,6 +14,10 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         // ログイン済みでログイン画面を開いたときの移動先(requirements.md 3.1.1)
         $middleware->redirectUsersTo(fn () => route('home'));
+
+        // 本番(Railway)では、前に立つプロキシが HTTPS を受けてアプリへ渡す。
+        // プロキシからのヘッダーを信頼しないと、URL やリダイレクト先が http になってしまう(architecture.md 8.5)
+        $middleware->trustProxies(at: '*');
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->shouldRenderJsonWhen(

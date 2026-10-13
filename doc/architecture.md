@@ -488,8 +488,8 @@ v3 ではデプロイまで行う(2026-10-11 決定。requirements.md 4章)。
 
 | Railway のサービス | 中身 | 起動コマンド |
 |---|---|---|
-| web | 本番用イメージ(nginx + PHP-FPM を supervisord で同居) | supervisord(nginx と PHP-FPM を起動) |
-| worker | web と同じイメージ | `php artisan queue:work --sleep=3 --max-time=3600` |
+| web | 本番用イメージ(nginx + PHP-FPM を supervisord で同居) | `start-web.sh`(イメージの既定) |
+| worker | web と同じイメージ | `start-worker.sh`(中で `php artisan queue:work --sleep=3 --max-time=3600`) |
 | Postgres | Railway の PostgreSQL | - |
 
 - web と worker は同じリポジトリ・同じ Dockerfile からビルドし、起動コマンドだけを変える(1章)
@@ -497,19 +497,31 @@ v3 ではデプロイまで行う(2026-10-11 決定。requirements.md 4章)。
 - `--max-time=3600` で1時間ごとに worker を入れ替え、メモリの増加を防ぐ(Railway が再起動する)
 - ドメインは Railway が発行するもの(`*.up.railway.app`)を使う。独自ドメインはスコープ外(requirements.md 10章)
 
-### 8.2 本番用イメージ(`docker/production/Dockerfile`)
+### 8.2 本番用イメージ(`docker/production/`)
 
 ローカル用(`docker/php/Dockerfile`)とは別に作る。マルチステージビルドにする。
 
 | ステージ | 内容 |
 |---|---|
-| 1. node | `npm ci` → `npm run build`(CSS / JS とフォントを `public/build` に出力) |
-| 2. composer | `composer install --no-dev --optimize-autoloader` |
-| 3. 実行用 | `php:8.5-fpm` + nginx + supervisor。1 と 2 の成果物をコピーする |
+| 1. vendor | `composer install --no-dev`(開発用のパッケージは入れない) |
+| 2. assets | `npm ci` → `npm run build`(CSS / JS とフォントを `public/build` に出力) |
+| 3. 実行用 | `php:8.5-fpm` + nginx + supervisor。1 と 2 の成果物をコピーし、オートロードを作る |
+
+| ファイル | 役割 |
+|---|---|
+| `Dockerfile` | 上の3ステージ |
+| `nginx.conf` | `PORT` で待ち受ける nginx の設定。`/build/` は1年キャッシュ(ファイル名にハッシュが付くため) |
+| `supervisord.conf` | web で nginx と PHP-FPM をまとめて動かす。ログは標準出力へ |
+| `php.ini` | OPcache などの本番用の設定 |
+| `start-web.sh` | `PORT` を nginx の設定に埋め込み、設定・ルート・画面をキャッシュして、supervisord を起動 |
+| `start-worker.sh` | 設定をキャッシュして、`queue:work` を起動 |
 
 - nginx は Railway が渡す `PORT` 環境変数で待ち受ける(起動時に設定ファイルへ埋め込む)
-- `config:cache` / `route:cache` / `view:cache` は、環境変数がそろう**起動時**に実行する(ビルド時には本番の環境変数がないため)
+- `config:cache` / `route:cache` / `view:cache` / `event:cache` は、環境変数がそろう**起動時**に実行する(ビルド時には本番の環境変数がないため)
 - ヘルスチェックは Laravel 標準の `/up` を使う
+- OPcache は PHP 8.5 から本体に組み込まれているので、拡張として入れない(設定だけ `php.ini` に書く)
+- `.env` などはイメージに入れない(`.dockerignore`)。秘密の値は Railway の環境変数で渡す
+- 手元での確かめ方: `docker build -f docker/production/Dockerfile -t recollect-prod .` でビルドし、本番と同じ環境変数を渡して起動する(2026-10-13 に確認済み)
 
 ### 8.3 デプロイの流れ
 
@@ -522,6 +534,16 @@ main に push
 ```
 
 - マイグレーションは web の pre-deploy コマンドでだけ実行する(worker と二重に走らせない)
+- web / worker の違いは、Railway のサービスごとの設定で指定する(リポジトリに Railway 用の設定ファイルは置かない)
+
+| 設定 | web | worker |
+|---|---|---|
+| ビルド | Dockerfile(`docker/production/Dockerfile`) | 同じ |
+| 起動コマンド | (イメージの既定 `start-web.sh`) | `start-worker.sh` |
+| デプロイ前コマンド | `php artisan migrate --force` | なし |
+| ヘルスチェック | `/up` | なし |
+| ドメイン | Railway が発行するもの | なし |
+| CI を待つ(Wait for CI) | 有効 | 有効 |
 - 管理者アカウントは、初回だけ Railway の CLI から `php artisan db:seed --class=AdminUserSeeder --force` で作る(requirements.md 3.1。開発用パスワードのままなら Seeder が止まる)
 - サンプルデータの Seeder は本番では実行しない。本番は管理者アカウントだけが入った空の状態から始める(2026-10-11 決定)。提出先の人も、ホームの `Create your first category` から自分で作って試す
 - 提出先の人がデータを削除・変更しても問題としない。復元の仕組みやバックアップは用意しない(2026-10-11 決定)
