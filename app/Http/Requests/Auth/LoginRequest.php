@@ -32,6 +32,7 @@ class LoginRequest extends FormRequest
 
     /**
      * 認証する。失敗したら、どちらの項目が違うかは出さず、1つのエラーにまとめる(screens.md 2.1)。
+     * 認証の失敗と回数の上限は、入力欄ではなくフォームの上に出すので、項目名ではなく credentials に付ける。
      *
      * @throws ValidationException
      */
@@ -44,7 +45,7 @@ class LoginRequest extends FormRequest
         if (! Auth::attempt($this->only('email', 'password'), remember: true)) {
             RateLimiter::hit($this->throttleKey(), self::DECAY_SECONDS);
 
-            throw ValidationException::withMessages(['email' => __('auth.failed')]);
+            throw ValidationException::withMessages(['credentials' => __('auth.failed')]);
         }
 
         RateLimiter::clear($this->throttleKey());
@@ -64,7 +65,7 @@ class LoginRequest extends FormRequest
         event(new Lockout($this));
 
         throw ValidationException::withMessages([
-            'email' => __('auth.throttle', ['seconds' => RateLimiter::availableIn($this->throttleKey())]),
+            'credentials' => __('auth.throttle', ['seconds' => RateLimiter::availableIn($this->throttleKey())]),
         ]);
     }
 

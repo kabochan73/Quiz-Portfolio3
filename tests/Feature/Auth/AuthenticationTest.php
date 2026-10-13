@@ -31,7 +31,7 @@ test('ログイン状態は、チェックボックスなしで常に30日間保
 });
 
 test('パスワードが違えばログインできず、1つのエラーを出す', function () {
-    login('wrong-password')->assertSessionHasErrors(['email' => 'These credentials do not match our records.']);
+    login('wrong-password')->assertSessionHasErrors(['credentials' => 'These credentials do not match our records.']);
 
     $this->assertGuest();
 });
@@ -48,7 +48,7 @@ test('1分間に6回失敗したら、何秒後に再試行できるかを出し
         login('wrong-password');
     }
 
-    login()->assertSessionHasErrors(['email' => __('auth.throttle', ['seconds' => 60])]);
+    login()->assertSessionHasErrors(['credentials' => __('auth.throttle', ['seconds' => 60])]);
 
     $this->assertGuest();
 });
