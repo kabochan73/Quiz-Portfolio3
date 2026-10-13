@@ -210,7 +210,7 @@ v3 では、カテゴリの一覧の画面(`/categories`)は作らない(2026-10
   9/28  [ 38 ]  普通
 ```
 
-- 「最近の点数」は直近5件。各行から、その回の履歴詳細へ移動できる
+- 「最近の点数」は直近10件(回答を残す件数 `quiz.answer_retention_limit` と同じ。2026-10-13 に5件から変更)。各行から、その回の履歴詳細へ移動できる
 - 削除の確認モーダルには `This will also delete 12 answers.` のように、一緒に消える回答の件数を表示する(回答が0件になった挑戦も消える。architecture.md 4.6)
 
 ### 2.9 回答フォーム `/sections/{section}/answers/create?mode=all|weak`

@@ -18,9 +18,6 @@ use Illuminate\View\View;
  */
 class QuestionController extends Controller
 {
-    // 問題詳細の「最近の点数」に出す件数(screens.md 2.8)
-    private const RECENT_SCORES_LIMIT = 5;
-
     public function __construct(private readonly QuestionService $questions) {}
 
     public function create(Section $section): View
@@ -51,7 +48,8 @@ class QuestionController extends Controller
             ->whereHas('attempt', fn ($query) => $query->where('status', AttemptStatus::Completed))
             ->with(['score', 'attempt'])
             ->orderByDesc('attempt_id')
-            ->limit(self::RECENT_SCORES_LIMIT)
+            // 回答は直近の保持件数(既定10件)しか残らないので、表示も同じ件数にそろえる(screens.md 2.8)
+            ->limit(config('quiz.answer_retention_limit'))
             ->get();
 
         return view('questions.show', [
