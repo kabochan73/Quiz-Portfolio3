@@ -223,6 +223,12 @@ Blade の匿名コンポーネントとして `resources/views/components/ui/` �
 - `rose-50` 背景・`rose-700` 文字・`rounded-lg`、左に赤のアイコン
 - `role="alert"` を付け、出たらすぐに読み上げる
 
+### 7.13 日時 `<x-ui.datetime>`(v3 で追加)
+
+- 日時は UTC で保存し、表示するときだけ日本時間(`config('quiz.display_timezone')`)に変える(architecture.md 2.7)。変換はこの部品だけで行う
+- 英語の書式にする(requirements.md 5.5): `short` は `Oct 7`(一覧など)、`long` は `Oct 8, 14:32`(結果画面など)
+- `<time datetime="...">` で出し、機械にも読める形にする
+
 ## 8. アクセシビリティ
 
 - 文字と背景のコントラストは WCAG AA(本文 4.5:1 以上)を満たす
