@@ -80,7 +80,34 @@ test('採点サービスには、問題文と回答を出題順に、選んだ�
     expect($spy->level)->toBe(GradingLevel::Strict)
         ->and(array_column($spy->items, 'position'))->toBe([0, 1])
         ->and(array_column($spy->items, 'answer'))->toBe(['回答 0', '回答 1'])
-        ->and($spy->items[0]->question)->toBe($attempt->answers[0]->question->body);
+        ->and($spy->items[0]->question)->toBe($attempt->answers[0]->question_body);
+});
+
+test('採点には、回答したときの問題文の写しを渡す。問題を書き直したり消したりしたあとでも同じ', function () {
+    // architecture.md 2.5(2026-10-13 決定)。失敗した挑戦を、あとで再採点するときなど
+    $attempt = pendingAttempt();
+    [$first, $second] = $attempt->answers;
+    $originalBodies = [$first->question_body, $second->question_body];
+    $first->question->update(['body' => '書き直した問題文']);
+    $second->question->delete();
+
+    $spy = new class implements GradingService
+    {
+        public array $items = [];
+
+        public function grade(array $items, GradingLevel $level): GradingResult
+        {
+            $this->items = $items;
+
+            return (new FakeGradingService)->grade($items, $level);
+        }
+    };
+    app()->instance(GradingService::class, $spy);
+
+    GradeAttempt::dispatchSync($attempt);
+
+    expect(array_column($spy->items, 'question'))->toBe($originalBodies)
+        ->and($attempt->refresh()->status)->toBe(AttemptStatus::Completed);
 });
 
 test('前の試行が途中で止まった挑戦(grading)は、もう一度採点する', function () {

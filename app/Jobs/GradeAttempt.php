@@ -58,12 +58,13 @@ final class GradeAttempt implements ShouldBeUnique, ShouldQueue
             return;
         }
 
-        $answers = $this->attempt->answers()->with('question')->get()->keyBy('position');
+        $answers = $this->attempt->answers()->get()->keyBy('position');
 
         $result = $grading->grade(
             $answers->map(fn (Answer $answer) => new GradingItem(
                 position: $answer->position,
-                question: $answer->question->body,
+                // 回答したときの問題文の写しを使う。問題を消したり書き直したりしたあとの再採点でも、その時の問題で採点できる(architecture.md 2.5)
+                question: $answer->question_body,
                 answer: $answer->body,
             ))->values()->all(),
             $this->attempt->grading_level,

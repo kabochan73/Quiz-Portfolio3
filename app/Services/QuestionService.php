@@ -7,12 +7,10 @@ use App\Models\Section;
 use Illuminate\Support\Facades\DB;
 
 /**
- * 問題の作成と削除。どちらも複数の行やテーブルにまたがるので、トランザクションで囲む(CLAUDE.md)。
+ * 問題の作成と削除。作成は、上限のチェックと追加をトランザクションで囲む(CLAUDE.md)。
  */
 final readonly class QuestionService
 {
-    public function __construct(private EmptyAttemptPruner $pruner) {}
-
     /**
      * 問題を追加する。1セクションの問題数には上限がある(requirements.md 3.2)。
      *
@@ -34,17 +32,11 @@ final readonly class QuestionService
     }
 
     /**
-     * 問題を削除する。回答と採点結果は cascade で消え、回答が0件になった挑戦も一緒に消す(architecture.md 4.6)。
+     * 問題を削除する。回答・採点結果・挑戦(履歴)は残す(architecture.md 4.6。2026-10-13 決定)。
+     * 回答の問題への参照は DB の ON DELETE SET NULL で空になり、問題文は回答の写し(question_body)に残る。
      */
     public function delete(Question $question): void
     {
-        DB::transaction(function () use ($question) {
-            // 削除すると回答から挑戦をたどれなくなるので、先に控えておく
-            $attemptIds = $question->answers()->pluck('attempt_id');
-
-            $question->delete();
-
-            $this->pruner->prune($attemptIds);
-        });
+        $question->delete();
     }
 }
