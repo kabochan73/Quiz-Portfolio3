@@ -46,7 +46,7 @@ test('カテゴリの一覧を作成順で渡す', function () {
 });
 
 test('カテゴリに関係のないページでは、強調するカテゴリはない', function () {
-    // ホームやカテゴリ一覧など
+    // ホームなど
     expect(sidebarData()['currentCategoryId'])->toBeNull();
 });
 

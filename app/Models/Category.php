@@ -27,7 +27,7 @@ class Category extends Model
     }
 
     /**
-     * カテゴリ内の全問題。カテゴリ一覧の問題数や、削除の確認モーダルの件数に使う(screens.md 2.2 / 2.4)。
+     * カテゴリ内の全問題。削除の確認モーダルの件数に使う(screens.md 2.4)。
      *
      * @return HasManyThrough<Question, Section, $this>
      */

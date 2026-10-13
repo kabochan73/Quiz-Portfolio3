@@ -17,6 +17,6 @@
             <p class="mt-2 text-sm text-neutral-600">{{ $message }}</p>
         @endif
 
-        <x-ui.button :href="route('categories.index')" class="mt-6 w-full">Back to categories</x-ui.button>
+        <x-ui.button :href="route('home')" class="mt-6 w-full">Back to home</x-ui.button>
     </x-ui.card>
 </x-layouts.minimal>

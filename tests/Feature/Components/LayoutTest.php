@@ -38,7 +38,7 @@ test('サイドバーに、ホーム・カテゴリの一覧・カテゴリ作�
     $this->blade('<x-layouts.app title="Categories">Body</x-layouts.app>')
         ->assertSeeInOrder([
             route('home'), 'Home',
-            route('categories.index'), 'Categories',
+            'Categories',
             route('categories.create'), 'New category',
             route('categories.show', $first), '基本情報',
             route('categories.show', $second), 'Laravel',

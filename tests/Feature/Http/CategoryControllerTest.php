@@ -37,13 +37,13 @@ test('カテゴリ名を変更すると、詳細へ移り、トーストを出�
     expect($category->fresh()->name)->toBe('New');
 });
 
-test('カテゴリを削除すると、配下もすべて消え、一覧へ戻る', function () {
+test('カテゴリを削除すると、配下もすべて消え、ホームへ戻る', function () {
     $section = Section::factory()->create();
     $question = Question::factory()->for($section)->create();
     scoredAttempt($section, [$question->id => 80]);
 
     $this->delete("/categories/{$section->category_id}")
-        ->assertRedirect(route('categories.index'))
+        ->assertRedirect(route('home'))
         ->assertSessionHas('toast', ['type' => 'success', 'message' => 'Category deleted.']);
 
     expect(Category::count())->toBe(0)

@@ -12,7 +12,7 @@ test('Factory でカテゴリ → セクション → 問題を作れる', funct
 });
 
 test('カテゴリからセクションと、セクションをまたいだ問題をたどれる', function () {
-    // カテゴリ一覧の問題数(screens.md 2.2)や削除の確認モーダルの件数(screens.md 2.4)に使う
+    // 削除の確認モーダルの件数に使う(screens.md 2.4)
     $category = Category::factory()->create();
     $sections = Section::factory()->count(2)->for($category)->create();
     Question::factory()->count(2)->for($sections[0])->create();

@@ -26,7 +26,8 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/home', HomeController::class)->name('home');
 
-    Route::resource('categories', CategoryController::class);
+    // カテゴリの一覧はサイドバーに任せるので、index は作らない(2026-10-13 決定)
+    Route::resource('categories', CategoryController::class)->except('index');
     // 作成は /categories/{category}/sections、それ以外は /sections/{section}(requirements.md 6章)。
     // セクション一覧はカテゴリ詳細にあるので、index は作らない
     Route::resource('categories.sections', SectionController::class)->shallow()->except('index');

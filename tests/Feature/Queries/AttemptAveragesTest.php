@@ -56,22 +56,6 @@ test('別のセクションの挑戦は、前回にならない', function () {
     expect((new AttemptAverages)->previous($attempt))->toBeNull();
 });
 
-test('セクションごとに、いちばん新しい完了済みの挑戦の平均点を返す', function () {
-    $other = Section::factory()->create();
-    $otherQuestion = Question::factory()->for($other)->create();
-    $untried = Section::factory()->create();
-
-    scoredAttempt($this->section, [$this->q1->id => 40]);
-    scoredAttempt($this->section, [$this->q1->id => 70, $this->q2->id => 90]);
-    scoredAttempt($other, [$otherQuestion->id => 55]);
-    // 採点中の挑戦は、新しくても無視する
-    scoredAttempt($other, [$otherQuestion->id => 99])->update(['status' => AttemptStatus::Pending]);
-
-    expect((new AttemptAverages)->latestForSections([$this->section->id, $other->id, $untried->id]))
-        ->toBe([$this->section->id => 80.0, $other->id => 55.0]);
-});
-
 test('対象を指定しなければ空', function () {
-    expect((new AttemptAverages)->forAttempts([]))->toBe([])
-        ->and((new AttemptAverages)->latestForSections([]))->toBe([]);
+    expect((new AttemptAverages)->forAttempts([]))->toBe([]);
 });

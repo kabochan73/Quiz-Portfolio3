@@ -57,37 +57,6 @@ final class AttemptAverages
         return $previousId === null ? null : ($this->forAttempts([$previousId])[$previousId] ?? null);
     }
 
-    /**
-     * セクションごとに、いちばん新しい完了済みの挑戦の平均点。カテゴリ詳細の「平均」に使う(screens.md 2.4)。
-     *
-     * @param  iterable<int>  $sectionIds
-     * @return array<int, float> セクション ID => 平均点(ID の順)。完了した挑戦がないセクションは含まない
-     */
-    public function latestForSections(iterable $sectionIds): array
-    {
-        $sectionIds = collect($sectionIds)->all();
-
-        if ($sectionIds === []) {
-            return [];
-        }
-
-        // セクションごとに、ID が最大の完了済みの挑戦を1つずつ選ぶ
-        $latestAttemptIds = DB::table('attempts')
-            ->where('status', AttemptStatus::Completed->value)
-            ->whereIn('section_id', $sectionIds)
-            ->groupBy('section_id')
-            ->selectRaw('section_id, MAX(id) AS attempt_id')
-            ->pluck('attempt_id', 'section_id');
-
-        $averages = $this->forAttempts($latestAttemptIds->values());
-
-        return $latestAttemptIds
-            ->filter(fn ($attemptId) => isset($averages[$attemptId]))
-            ->map(fn ($attemptId) => $averages[$attemptId])
-            ->sortKeys()
-            ->all();
-    }
-
     private function completedScores(): Builder
     {
         return DB::table('attempts')

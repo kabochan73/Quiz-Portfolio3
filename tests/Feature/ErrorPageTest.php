@@ -16,8 +16,8 @@ test('存在しないページは、404 のページを出す', function () {
     $this->get('/no-such-page')
         ->assertNotFound()
         ->assertSee('<title>Page not found | recollect</title>', false)
-        ->assertSee('Back to categories')
-        ->assertSee(route('categories.index'), false);
+        ->assertSee('Back to home')
+        ->assertSee(route('home'), false);
 });
 
 test('存在しないカテゴリを開いても、404 のページを出す', function () {
