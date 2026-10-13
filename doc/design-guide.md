@@ -65,6 +65,7 @@ v3 は**黒と白を基調にしたシックなデザイン**にする(2026-10-1
 
 - Inter: 400 / 500 / 600、Noto Sans JP: 400 / 500 / 700
 - Laravel の Vite プラグインの `fonts`(`google()`)で、**ビルド時に Google Fonts から取り込み、自サイトから配信する**。表示のたびに外部へ取りに行かない(`vite.config.js`)
+- ページへの読み込みは、Laravel の `@fonts` ではなく `App\Support\FontTags` で、ビルドしたフォントの CSS ファイルを `<link>` で読む(2026-10-13)。`@fonts` は CSS をページの中に書き出すので、どのページの HTML も約300KB 重くなるため。`npm run dev` のときだけ `@fonts` を使う
 - Noto Sans JP は文字の範囲ごとに約120個のファイルに分かれている。ブラウザはページで使われている文字の範囲のファイルだけを取りに行くので、先読み(preload)はしない
 - 英数字は Inter、日本語は Noto Sans JP で表示される
 - v3 では画面の文言は英語だが、問題文・回答・採点コメントは日本語になるため、Noto Sans JP も引き続き読み込む(requirements.md 5.5)
