@@ -225,7 +225,7 @@ Blade の匿名コンポーネントとして `resources/views/components/ui/` �
 
 ### 7.13 日時 `<x-ui.datetime>`(v3 で追加)
 
-- 日時は UTC で保存し、表示するときだけ日本時間(`config('quiz.display_timezone')`)に変える(architecture.md 2.7)。変換はこの部品だけで行う
+- 日時は UTC で保存し、表示するときだけ日本時間(`config('quiz.display_timezone')`)に変える(architecture.md 2.7)。変換は `App\Support\DisplayTime` にまとめ、この部品やパンくずから使う
 - 英語の書式にする(requirements.md 5.5): `short` は `Oct 7`(一覧など)、`long` は `Oct 8, 14:32`(結果画面など)
 - `<time datetime="...">` で出し、機械にも読める形にする
 
