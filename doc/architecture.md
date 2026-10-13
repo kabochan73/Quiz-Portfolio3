@@ -94,9 +94,10 @@
 | カラム | 型 | 制約 |
 |---|---|---|
 | id | bigint | PK |
-| question_id | bigint | FK → questions.id, ON DELETE CASCADE |
+| question_id | bigint | NULL。FK → questions.id, ON DELETE SET NULL(問題を削除しても回答は残す。2026-10-13 v3 で変更。v2 は CASCADE) |
 | attempt_id | bigint | FK → attempts.id, ON DELETE CASCADE |
 | position | smallint | NOT NULL。その挑戦の中での問題の順番(0始まり) |
+| question_body | text | NOT NULL。**回答したときの問題文の写し**(2026-10-13 v3 で追加) |
 | body | text | NOT NULL(アプリ側で 5000 文字まで) |
 | created_at / updated_at | timestamptz | |
 
@@ -105,6 +106,12 @@
 - `(attempt_id, question_id)` UNIQUE(1つの挑戦の中で、同じ問題への回答は1つだけにする。2026-10-11 v3 で追加)
   - 送信時の入力チェック(4.2)でも防いでいるが、送信データの書き換えやバグですり抜けた場合に、平均点や前回の点数がおかしくならないよう DB でも止める
 - `(question_id, attempt_id)`(前回の点数・最新の点数・履歴の整理で使う。順番は挑戦の ID で決める。2.7)
+
+**問題文の写し(`question_body`)**(2026-10-13 v3 で追加。requirements.md 3.4)
+- 履歴は「その時に何を答えて、何点だったか」の記録なので、あとから問題を消したり書き直したりしても変わらないようにする
+- 回答を保存するとき、モデル(`Answer`)が問題の今の問題文を自動で写す。回答を作るどこからでも書き忘れが起きないように
+- 採点(4.3 / 4.4)と結果画面は、問題(questions)ではなく、この写しを使う
+- 問題を削除すると `question_id` は NULL になる。その回答は、前回の点数・最新の点数・苦手問題・古い回答の整理の対象から外れる(どれも問題ごとの集計なので)。結果画面と挑戦の平均点には、そのまま残る
 
 ### 2.6 scores
 
@@ -216,7 +223,7 @@ handle():
      UPDATE attempts SET status = 'grading'
      WHERE id = :id AND status IN ('pending', 'grading')
      → 更新件数が0なら(すでに completed / failed)何もせず終了
-  2. GradingService::grade(answers, level) を呼ぶ(4.4)
+  2. GradingService::grade(answers, level) を呼ぶ(4.4)。問題文は、回答に写した question_body を渡す(2.5)
   3. トランザクションで保存する
      - scores を position の順に作成
      - attempts の status = completed、graded_at、model、使用量を更新
@@ -403,22 +410,14 @@ TCPはコネクション型で…
 - 削除によって回答が0件になった挑戦(attempts)も削除する
 - 採点中・失敗した挑戦の回答も件数に含める
 
-### 4.6 問題の削除(2026-10-11 v3 で追加)
+### 4.6 問題の削除(2026-10-11 v3 で追加、2026-10-13 に変更)
 
-問題を削除すると、その問題への回答(answers)と採点結果(scores)は cascade で消える。その結果、**回答が0件になった挑戦**が履歴に残ってしまうため、同じトランザクションで削除する。
+問題を削除しても、**履歴(回答・採点結果・挑戦)は残す**(2026-10-13 決定。requirements.md 3.2)。
 
-```
-BEGIN
-  削除する問題に回答している挑戦の ID を控える
-  DELETE FROM questions WHERE id = :question_id      ← answers / scores は cascade で消える
-  控えた挑戦のうち、回答が0件になったものを削除する
-COMMIT
-```
-
-- 「回答が0件になった挑戦を消す」処理は、古い回答の整理(4.5)と共通にする
-- 回答が残っている挑戦は消さない。その挑戦の平均点は、残った回答だけで計算し直される(平均点は保存せず毎回計算するため)
-- 削除の確認モーダルには、一緒に消える回答の件数を表示する
-- カテゴリ / セクションの削除では、挑戦も cascade で消えるので、この処理は要らない
+- 回答の `question_id` は DB の `ON DELETE SET NULL` で NULL になる。回答には問題文の写し(2.5)があるので、結果画面はそのまま表示できる
+- 挑戦も消えないので、v2 / 2026-10-11 版にあった「回答が0件になった挑戦を消す」処理は、問題の削除では行わない(古い回答の整理 4.5 では引き続き行う)
+- 削除の確認モーダルには、件数ではなく `Your history will be kept.` と出す
+- カテゴリ / セクションを削除したときは、これまでどおり配下の問題・挑戦・回答・採点結果も cascade で消える
 
 ### 4.7 再採点(`POST /attempts/{attempt}/regrade`)
 
