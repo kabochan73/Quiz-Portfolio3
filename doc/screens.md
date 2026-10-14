@@ -358,55 +358,39 @@ AIの採点中にエラーが発生しました。回答は保存されている
 
 このアプリのコンセプトと使い方を表示する(requirements.md 3.1.1)。文言は 4.3 に従う。
 
-**当面の実装(2026-10-12 決定)**: ホームの文章は後回しにする。それまでは、白紙の画面に `New category` ボタン(カテゴリ作成画面へ)だけを置く。
+紹介の文章は日本語、ボタンは英語にする(requirements.md 5.5 の例外。2026-10-14 決定)。
 
 ```
-(ページ見出しなし・パンくずなし)
+(ページ見出しの部品・パンくずは使わない)
 
-                 [ New category ]                     ← 主ボタン
+思い出す、そして理解する                          ← 大きな見出し
+自分の言葉で答えを書くことで、
+自分が本当に理解しているかを確かめる学習アプリです。
+
+ (1) 問題を作成                                    ← 使い方。縦一列、下線で区切る
+     カテゴリとセクションを作って、…
+─────────────────────────────────────────────
+ (2) 自分の言葉で回答
+─────────────────────────────────────────────
+ (3) AIが採点、フィードバック
+─────────────────────────────────────────────
+ (4) 苦手だけ再挑戦
+─────────────────────────────────────────────
+
+こんな人におすすめ
+┌──────────────────────┐ ┌──────────────────────┐
+│ ✓ 向いている使い方     │ │ ✕ 向いていない使い方   │
+│ ・…                  │ │ ・…                  │
+└──────────────────────┘ └──────────────────────┘
+※ 費用の説明(文章は未定)
+
+さあ、始めよう。                  [ + New category ]   ← 枠なし。主ボタン
 ```
 
-以下は、文章が決まったときに作るホームの設計。文章は仮のもので、配置(コンセプト → 使い方 → ヒント → ボタン)だけを確定とする。
-
-```
-Learn by explaining                          ← ページ見出し(パンくずなし)
-Write answers in your own words.
-AI grades them and shows how to improve.
-
-┌─────────────────────────────────────────────────────┐
-│ Is this app for you?                                │
-│                                                     │
-│ ✓ Good for                 ✕ Not a good fit         │
-│   Topics you want to         Memorizing words or    │
-│   understand and explain     facts with one answer  │
-│   …                          …                      │
-└─────────────────────────────────────────────────────┘
-
-How to use
-┌─────────────────────────────────────────────────────┐
-│ 1  Create a category                                │
-│    For example, "Networking".                       │
-├─────────────────────────────────────────────────────┤
-│ 2  Add a section and questions                      │
-│    Up to 10 questions per section.                  │
-├─────────────────────────────────────────────────────┤
-│ 3  Answer in your own words                         │
-│ 4  Read the feedback                                │
-│ 5  Retry weak questions                             │
-└─────────────────────────────────────────────────────┘
-
-Tips
-・Write without looking at your notes.
-・…
-
-                 [ Go to categories ]                 ← 主ボタン
-```
-
-- コンセプト(向いている使い方 / 向いていない使い方)を、使い方より先に置く。ここが一番伝えたいことのため
+- 使い方は手順なので、上から順に読めるよう縦一列に並べる。番号を左、見出しと説明を右に置き、カードで囲まず下線だけで区切る
 - 「向いている / 向いていない」は PC では2列、スマホでは縦に並べる
-- 使い方は番号付きの手順にする。手順 4 では、フィードバックの3項目(Good points / What went wrong / Model answer)の名前を出す
-- 一番下の主ボタンはカテゴリ一覧へ移動する(※ カテゴリの一覧の画面は作らないことにしたので、文章を決めるときにこのボタンも見直す。2026-10-13)。カテゴリが0件のときは、代わりに `Create your first category`(カテゴリ作成画面へ)を出す
-- 中身はすべて固定の文章。カテゴリの件数を見る以外に DB は使わない
+- 一番下の `New category` はカテゴリ作成画面へ移動する。紹介を読み終えたところで、最初のカテゴリを作れるようにするため
+- 中身はすべて固定の文章で、DB は使わない
 
 ## 3. 画面遷移
 
@@ -468,19 +452,8 @@ Tips
 | | ラベル / ボタン | `Email` / `Password` / `Log in` |
 | | 認証エラー | `These credentials do not match our records.`(Laravel 標準) |
 | | 試行回数の制限 | `Too many login attempts. Please try again in 42 seconds.`(Laravel 標準) |
-| ホーム(当面) | ボタン | `New category` |
-| ホーム(**文章は仮・後回し**。2.12 参照) | 見出し / リード文 | `Learn by explaining` / `Write answers in your own words. AI grades them and shows how to improve.` |
-| | コンセプトの見出し | `Is this app for you?` |
-| | 向いている(`Good for`) | `Topics you want to understand and explain, like how something works or why.` / `Studying for interviews or exams with written answers.` / `Checking if you really understand, not just remember.` |
-| | 向いていない(`Not a good fit`) | `Memorizing words or facts with one right answer. Flash cards work better for that.` / `Quick quizzes. Each answer takes a few minutes to write.` |
-| | 使い方の見出し | `How to use` |
-| | 手順1 | `Create a category` / `For example, "Networking" or "Laravel".` |
-| | 手順2 | `Add a section and questions` / `Up to 10 questions per section.` |
-| | 手順3 | `Answer in your own words` / `Answer all questions at once. Choose a grading level: Easy, Normal, or Strict.` |
-| | 手順4 | `Read the feedback` / `AI gives each answer a score from 0 to 100, with Good points, What went wrong, and a Model answer.` |
-| | 手順5 | `Retry weak questions` / `Questions under 60 are weak. Retry only those until you get them.` |
-| | ヒントの見出し / 本文 | `Tips` / `Write without looking at your notes.` / `Short answers are fine. Try to explain why.` / `Compare your answer with the model answer.` |
-| | ボタン | `Go to categories` / カテゴリが0件のとき `Create your first category` |
+| ホーム | 文章 | 日本語の紹介文。文面は `resources/views/home.blade.php` を正とする(2.12) |
+| | ボタン | `New category` |
 | サイドバー | カテゴリの見出し | `Categories`(リンクにしない) |
 | カテゴリ作成・編集 | 見出し / ラベル | `New category` / `Edit category` / `Name` |
 | カテゴリ詳細 | 見出し / ボタン | `Sections` / `Add section`(ページ見出しの下の補足は出さない) |
