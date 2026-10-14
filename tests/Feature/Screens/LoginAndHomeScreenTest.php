@@ -43,14 +43,22 @@ test('入力が足りなければ、その項目の下にエラーを出す', fu
         ->assertDontSee('role="alert"', false);
 });
 
-test('ホームには、New category ボタンだけを置く', function () {
-    // screens.md 2.12: コンセプトと使い方の文章は後回し
+test('ホームに、アプリの紹介・使い方・向いている使い方と、New category ボタンを出す', function () {
+    // screens.md 2.12
     $this->actingAs(User::factory()->create())
         ->get('/home')
         ->assertOk()
         ->assertSee('<title>Home | Recollect</title>', false)
-        ->assertSee('href="'.route('categories.create').'"', false)
-        ->assertSee('New category');
+        // 紹介の文章だけは日本語(2026-10-14 決定)。ボタンは英語
+        ->assertSeeInOrder([
+            '思い出す、そして理解する',
+            '問題を作成', '自分の言葉で回答', 'AIが採点、フィードバック', '苦手だけ再挑戦',
+            'こんな人におすすめ', '向いている使い方', '向いていない使い方',
+            // ボタンは一番下に、「さあ、始めよう。」と並べる
+            'さあ、始めよう。', 'New category',
+        ])
+        ->assertSee('lang="ja"', false)
+        ->assertSee('href="'.route('categories.create').'"', false);
 });
 
 test('ログインすると、ホームが表示される', function () {
