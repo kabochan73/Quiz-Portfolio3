@@ -92,7 +92,7 @@ class SampleDataSeeder extends Seeder
 
         $attempt->update([
             'status' => AttemptStatus::Completed,
-            'model' => 'claude-sonnet-5-5',
+            'model' => 'claude-haiku-5-5',
             'input_tokens' => 12340,
             'output_tokens' => 3210,
             'web_search_requests' => 1,

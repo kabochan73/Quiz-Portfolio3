@@ -34,7 +34,7 @@ class AttemptFactory extends Factory
     {
         return $this->state(fn () => [
             'status' => AttemptStatus::Completed,
-            'model' => 'claude-sonnet-5-5',
+            'model' => 'claude-haiku-5-5',
             'input_tokens' => fake()->numberBetween(1000, 20000),
             'output_tokens' => fake()->numberBetween(500, 5000),
             'web_search_requests' => fake()->numberBetween(0, 3),

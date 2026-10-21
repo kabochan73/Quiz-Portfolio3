@@ -24,7 +24,7 @@ test('採点済みの挑戦は、利用量と採点日時を持つ', function ()
     $attempt = Attempt::factory()->completed()->create()->fresh();
 
     expect($attempt->status)->toBe(AttemptStatus::Completed)
-        ->and($attempt->model)->toBe('claude-sonnet-5-5')
+        ->and($attempt->model)->toBe('claude-haiku-5-5')
         ->and($attempt->input_tokens)->toBeInt()
         ->and($attempt->graded_at)->not->toBeNull();
 });

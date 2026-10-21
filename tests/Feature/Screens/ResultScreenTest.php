@@ -141,11 +141,11 @@ test('問題を消したあとでも、採点に失敗した挑戦の回答一�
 
 test('使用量を一番下に小さく出す。単価が設定されていればコストも出す', function () {
     config([
-        'quiz.pricing' => ['claude-sonnet-5-5' => ['input_per_mtok' => '2', 'output_per_mtok' => '10']],
+        'quiz.pricing' => ['claude-haiku-5-5' => ['input_per_mtok' => '2', 'output_per_mtok' => '10']],
         'quiz.web_search_per_request' => '0.01',
     ]);
     $attempt = scoredAttempt($this->section, [$this->q1->id => 85]);
-    $attempt->update(['model' => 'claude-sonnet-5-5', 'input_tokens' => 12340, 'output_tokens' => 3210, 'web_search_requests' => 2]);
+    $attempt->update(['model' => 'claude-haiku-5-5', 'input_tokens' => 12340, 'output_tokens' => 3210, 'web_search_requests' => 2]);
 
     $this->get(resultUrl($this->section, $attempt))
         ->assertSeeInOrder(['Usage: 12,340 input / 3,210 output tokens', '· 2 searches', '· about $0.08'], false);
