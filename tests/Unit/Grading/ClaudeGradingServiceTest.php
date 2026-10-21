@@ -33,7 +33,7 @@ function claudeItems(): array
 /**
  * Messages API の応答(JSON)を作る。
  */
-function claudeResponse(array $content, string $stopReason = 'tool_use', array $usage = [], string $model = 'claude-sonnet-5-5'): Response
+function claudeResponse(array $content, string $stopReason = 'tool_use', array $usage = [], string $model = 'claude-haiku-5-5'): Response
 {
     return new Response(200, ['Content-Type' => 'application/json'], json_encode([
         'id' => 'msg_test',
@@ -86,7 +86,7 @@ function claudeService(array $responses, ?array &$history = null, ?array &$timeo
         client: new Client(apiKey: 'test-key'),
         prompt: new GradingPrompt,
         parser: new GradeResultParser,
-        model: 'claude-sonnet-5-5',
+        model: 'claude-haiku-5-5',
         timeLimitSeconds: $timeLimit,
         transport: function (float $timeout) use ($stack, &$timeouts) {
             $timeouts[] = $timeout;
@@ -108,28 +108,29 @@ test('1回目で submit_grades が呼ばれれば、その結果を返す', func
 
     expect($history)->toHaveCount(1)
         ->and(array_column($result->grades, 'score'))->toBe([80, 50])
-        ->and($result->model)->toBe('claude-sonnet-5-5')
+        ->and($result->model)->toBe('claude-haiku-5-5')
         ->and($result->inputTokens)->toBe(100)
         ->and($result->outputTokens)->toBe(50);
 });
 
-test('リクエストに、設計どおりのツール・指示文・フォールバックの指定が入る', function () {
+test('リクエストに、設計どおりのツールと指示文が入る', function () {
     claudeService([claudeResponse([submitGradesBlock(validGrades())])], $history)
         ->grade(claudeItems(), GradingLevel::Strict);
 
     $body = sentBody($history, 0);
     $request = $history[0]['request'];
 
-    expect($body['model'])->toBe('claude-sonnet-5-5')
+    expect($body['model'])->toBe('claude-haiku-5-5')
         ->and($body['max_tokens'])->toBe(16000)
         ->and($body['tool_choice'])->toBe(['type' => 'auto'])
-        ->and($body['fallbacks'])->toBe('default')
-        ->and($request->getHeaderLine('anthropic-beta'))->toContain('server-side-fallback-2026-07-01')
+        // Claude Haiku 5.5 には fallbacks がない(architecture.md 4.4)
+        ->and($body)->not->toHaveKey('fallbacks')
+        ->and($request->getHeaderLine('anthropic-beta'))->not->toContain('server-side-fallback')
         ->and($body['system'])->toContain(GradingLevel::Strict->policyText())
         ->and($body['messages'][0]['content'])->toContain('<item position="1">');
 
     // Web検索: 2問 × 2 = 4回まで
-    expect($body['tools'][0])->toBe(['type' => 'web_search_20260209', 'name' => 'web_search', 'max_uses' => 4]);
+    expect($body['tools'][0])->toBe(['type' => 'web_search_20250305', 'name' => 'web_search', 'max_uses' => 4]);
 
     // submit_grades: strict で、JSON Schema のキー(additionalProperties)や項目名がそのまま送られる
     $submit = $body['tools'][1];
@@ -184,9 +185,9 @@ test('pause_turn が続きすぎたら失敗にする', function () {
     claudeService([$paused(), $paused(), $paused(), $paused()])->grade(claudeItems(), GradingLevel::Normal);
 })->throws(GradingFailedException::class, '途中で止まった');
 
-test('フォールバックしても拒否されたら失敗にする', function () {
+test('拒否されたら失敗にする', function () {
     $response = new Response(200, ['Content-Type' => 'application/json'], json_encode([
-        'id' => 'msg_test', 'type' => 'message', 'role' => 'assistant', 'model' => 'claude-sonnet-5-5',
+        'id' => 'msg_test', 'type' => 'message', 'role' => 'assistant', 'model' => 'claude-haiku-5-5',
         'content' => [], 'stop_reason' => 'refusal', 'stop_sequence' => null,
         'stop_details' => ['type' => 'refusal', 'category' => 'cyber', 'explanation' => null],
         'usage' => ['input_tokens' => 10, 'output_tokens' => 0],
@@ -194,13 +195,6 @@ test('フォールバックしても拒否されたら失敗にする', function
 
     claudeService([$response])->grade(claudeItems(), GradingLevel::Normal);
 })->throws(GradingFailedException::class, 'cyber');
-
-test('別のモデルにフォールバックして採点されたら、そのモデル名を記録する', function () {
-    $result = claudeService([claudeResponse([submitGradesBlock(validGrades())], model: 'claude-sonnet-5')])
-        ->grade(claudeItems(), GradingLevel::Normal);
-
-    expect($result->model)->toBe('claude-sonnet-5');
-});
 
 test('提出された結果が不正なら、検証の例外をそのまま投げる', function () {
     claudeService([claudeResponse([submitGradesBlock([validGrades()[0]])])])

@@ -271,16 +271,16 @@ failed(Throwable $e):   ← 3回とも失敗したとき
    → 不正なら例外を投げる → Job のリトライへ
 ```
 
-- **ツールの呼び出しは強制しない**(2026-10-10 変更)。Claude Sonnet 5.5 では `tool_choice` の `tool` / `any`(特定のツールを必ず呼ばせる指定)が 400 エラーになるため。
+- **ツールの呼び出しは強制しない**(2026-10-10 変更)。当初の Claude Sonnet 5.5 では `tool_choice` の `tool` / `any`(特定のツールを必ず呼ばせる指定)が 400 エラーになったため。Claude Haiku 5.5 では受け付けるが、強制すると考えずにすぐツールを呼ぶので、強制しないままにする
   代わりに、`submit_grades` を `strict: true` にして引数がスキーマどおりになることを保証し、system プロンプトと2回目のメッセージで提出を明示的に指示する
 - 使用量(トークン数・検索回数)は、1回目と2回目を合計して保存する
-- モデル名は `config('services.anthropic.model')`(既定: `claude-sonnet-5-5`)
+- モデル名は `config('services.anthropic.model')`(既定: `claude-haiku-5-5`)。基本的な資格試験レベルの問題を採点する用途で、料金が Sonnet 5.5 の約20分の1になるため、Claude Haiku 5.5 にする(2026-10-21 変更。以前は `claude-sonnet-5-5`)
 - `max_tokens` は 16000(思考と全問のフィードバックが収まるように)
 - 1回の採点にかける時間の上限は 200 秒。各 API 呼び出しには残り時間をタイムアウトとして渡し、Job の `$timeout`(240 秒)に収める。SDK 自体の再試行は 0 回(再試行は Job が行う)
   - PHP の SDK は、リクエストのタイムアウトを自分では強制しない(HTTP クライアントに任せている)。そのため呼び出しごとに、残り時間をタイムアウトにした HTTP クライアント(Guzzle)を作って SDK に渡す(2026-10-12 実装時に確認)
   - テストでは、この HTTP クライアントを「決まった応答を返すモック」に差し替え、本物の SDK を通したまま、ネットワークなしで確かめる
 - 応答が途中で止まった(`pause_turn`)ときは、応答を会話に足して続けさせる(3回まで)
-- 安全上の理由で拒否された(`refusal`)ときに、API 側で別のモデルに自動で回す `fallbacks: "default"` を指定する(beta `server-side-fallback-2026-07-01`)。それでも拒否されたら例外 → Job のリトライへ
+- 安全上の理由で拒否された(`refusal`)ときは、例外 → Job のリトライへ。Claude Haiku 5.5 には、拒否されたときに API 側で別のモデルへ回す `fallbacks` がない(2026-10-21 変更。Sonnet 5.5 のときは `fallbacks: "default"` を指定していた)
 
 #### submit_grades ツールの定義
 
@@ -401,6 +401,7 @@ TCPはコネクション型で…
 #### Web検索ツール
 
 - `web_search`(サーバー側で実行されるツール)を渡す
+- 種類は `web_search_20250305`。検索結果を絞り込む新しい `web_search_20260209` は Opus / Sonnet 専用で、Claude Haiku 5.5 では使えないため(2026-10-21 変更)
 - `max_uses` は問題数 × 2(最小2、最大10)
 
 ### 4.5 古い回答の整理(`AnswerRetentionService`)
@@ -441,7 +442,7 @@ TCPはコネクション型で…
 ```php
 // config/quiz.php
 'pricing' => [
-    'claude-sonnet-5-5' => [
+    'claude-haiku-5-5' => [
         'input_per_mtok'  => env('QUIZ_PRICE_INPUT_PER_MTOK'),   // 100万入力トークンあたりのドル
         'output_per_mtok' => env('QUIZ_PRICE_OUTPUT_PER_MTOK'),  // 100万出力トークンあたりのドル
     ],
@@ -451,8 +452,9 @@ TCPはコネクション型で…
 
 - 単価は Anthropic の公式料金表の値を設定する(このドキュメントには値を書かない。料金が変わっても設定だけ直せばよいように)
 - 推定コスト = 入力トークン × 入力単価 + 出力トークン × 出力単価 + 検索回数 × 検索単価
+- Claude Haiku 5.5 は、1回の入力が10万トークンを超えると単価が上がる。採点の入力はふだん数万トークンなので、10万以下の単価だけを設定する(超えたときの推定コストは、実際より少なく出る)
 - 計算は `App\Support\CostCalculator` にまとめ、Unit テストで検証する
-- 単価が設定されていないモデルの場合、コストは表示しない(トークン数だけ表示する)。フェイク採点(モデル名 `fake`)や、拒否されて別のモデルが採点した場合もこれに当たる
+- 単価が設定されていないモデルの場合、コストは表示しない(トークン数だけ表示する)。フェイク採点(モデル名 `fake`)や、以前の Sonnet 5.5 で採点した挑戦もこれに当たる
 - 検索の単価が未設定でも、検索回数が 0 ならコストを計算する
 
 ## 6. 権限
@@ -561,7 +563,7 @@ web と worker で共通の値は Railway の Shared Variables に置く。
 | `QUEUE_CONNECTION` / `SESSION_DRIVER` / `CACHE_STORE` | `database` |
 | `LOG_CHANNEL` | `stderr`(Railway のログ画面で見られるように) |
 | `GRADING_DRIVER` | `claude` |
-| `ANTHROPIC_API_KEY` / `ANTHROPIC_MODEL` | API キー / `claude-sonnet-5-5` |
+| `ANTHROPIC_API_KEY` / `ANTHROPIC_MODEL` | API キー / `claude-haiku-5-5` |
 | `ADMIN_EMAIL` / `ADMIN_PASSWORD` | 本番用の値(パスワードはランダムな8文字以上) |
 | `QUIZ_PRICE_*` | Anthropic の公式料金表の値 |
 

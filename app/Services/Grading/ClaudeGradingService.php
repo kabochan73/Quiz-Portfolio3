@@ -15,8 +15,8 @@ use Psr\Http\Client\ClientInterface;
  *
  * 1回目: web_search と submit_grades を AI の判断で使わせる。
  * 2回目: 1回目で submit_grades が呼ばれなかったときだけ、会話を引き継いで提出を頼む。
- * ツールの呼び出しを強制する tool_choice は、Claude Sonnet 5.5 では使えない(400 になる)ため、
- * submit_grades を strict にして引数の形を保証し、プロンプトで提出を指示している。
+ * ツールの呼び出しを強制する tool_choice は使わない。Claude Haiku 5.5 では受け付けるが、強制すると
+ * 考えずにすぐツールを呼ぶため。submit_grades を strict にして引数の形を保証し、プロンプトで提出を指示している。
  */
 final class ClaudeGradingService implements GradingService
 {
@@ -26,9 +26,6 @@ final class ClaudeGradingService implements GradingService
 
     // 応答が途中で止まった(pause_turn)ときに続けさせる回数の上限
     private const MAX_CONTINUATIONS = 3;
-
-    // 拒否されたときに API 側で別のモデルへ回す(fallbacks: "default")ためのベータ
-    private const FALLBACK_BETA = 'server-side-fallback-2026-07-01';
 
     private const SUBMIT_REQUEST = '採点結果を submit_grades で提出してください。';
 
@@ -76,7 +73,6 @@ final class ClaudeGradingService implements GradingService
 
         return new GradingResult(
             grades: $this->parser->parse($toolInput, $items),
-            // 拒否されて別のモデルが採点した場合は、そのモデル名になる
             model: $response->model,
             inputTokens: $usage['input'],
             outputTokens: $usage['output'],
@@ -98,7 +94,7 @@ final class ClaudeGradingService implements GradingService
             $this->addUsage($usage, $response);
 
             if ($response->stopReason === 'refusal') {
-                // fallbacks で別のモデルに回しても拒否された
+                // Claude Haiku 5.5 には、拒否されたときに別のモデルへ回す仕組み(fallbacks)がない。Job の再試行に任せる
                 throw new GradingFailedException('採点を拒否されました: '.($response->stopDetails?->category ?? 'unknown'));
             }
 
@@ -130,11 +126,9 @@ final class ClaudeGradingService implements GradingService
             maxTokens: self::MAX_TOKENS,
             messages: $messages,
             model: $this->model,
-            fallbacks: 'default',
             system: $this->prompt->system($level),
             tools: [$this->webSearchTool(count($items)), $this->submitGradesTool()],
             toolChoice: ['type' => 'auto'],
-            betas: [self::FALLBACK_BETA],
             requestOptions: [
                 'transporter' => ($this->transport)($remaining),
                 // 再試行は Job が行う(architecture.md 4.3)。SDK でも再試行すると、時間の上限を読めなくなる
@@ -170,13 +164,14 @@ final class ClaudeGradingService implements GradingService
     /**
      * 時間とともに変わる事実を確かめるための Web検索(サーバー側で実行される)。
      * 回数の上限は 問題数 × 2(最小2、最大10)。
+     * 検索結果を絞り込む新しい版(web_search_20260209)は Opus / Sonnet 専用のため、Haiku で使える基本の版にする。
      *
      * @return array<string, mixed>
      */
     private function webSearchTool(int $itemCount): array
     {
         return [
-            'type' => 'web_search_20260209',
+            'type' => 'web_search_20250305',
             'name' => 'web_search',
             'maxUses' => max(2, min(10, $itemCount * 2)),
         ];

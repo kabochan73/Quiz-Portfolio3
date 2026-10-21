@@ -34,11 +34,13 @@ return [
     | 推定コストの表示に使う。料金が変わっても設定だけ直せばよいよう、値はコードに書かず
     | .env で Anthropic の公式料金表の値(ドル)を設定する。
     | 未設定(null)のモデルはコストを表示せず、トークン数だけを表示する。
+    | Claude Haiku 5.5 は、1回の入力が10万トークンを超えると単価が上がる。採点の入力はふだん数万トークンなので、
+    | 10万以下の単価だけを設定する(超えたときの推定コストは、実際より少なく出る)。
     |
     */
 
     'pricing' => [
-        'claude-sonnet-5-5' => [
+        'claude-haiku-5-5' => [
             'input_per_mtok' => env('QUIZ_PRICE_INPUT_PER_MTOK'),   // 100万入力トークンあたり
             'output_per_mtok' => env('QUIZ_PRICE_OUTPUT_PER_MTOK'), // 100万出力トークンあたり
         ],

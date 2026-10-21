@@ -45,7 +45,7 @@ return [
     // Claude API(GRADING_DRIVER=claude のときに使う。architecture.md 4.4)
     'anthropic' => [
         'api_key' => env('ANTHROPIC_API_KEY'),
-        'model' => env('ANTHROPIC_MODEL', 'claude-sonnet-5-5'),
+        'model' => env('ANTHROPIC_MODEL', 'claude-haiku-5-5'),
     ],
 
 ];
