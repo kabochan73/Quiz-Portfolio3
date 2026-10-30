@@ -1,58 +1,107 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Recollect
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+自由記述で答えた問題を AI(Claude API)が採点し、フィードバックを返す個人用の学習アプリです。
+Laravel + Blade 構成で、採点はキューのワーカーで非同期に行います。
 
-## About Laravel　あ
+## デモ
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+- 本番環境: https://web-production-82e46.up.railway.app
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## ER図
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+![ER図](doc/images/er-diagram.png)
 
-## Learning Laravel
+## 主な機能
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+- カテゴリ・セクション・問題の管理(作成・編集・削除。1セクション10問まで)
+- セクションの全問に一括で回答し、AI が 0〜100点で採点(採点の厳しさは Easy / Normal / Strict)
+- 1問ごとのフィードバック(良かった点 / 悪かった点 / 模範解答)と、前回の点数との比較
+- 60点未満の問題だけを解き直す「苦手問題の再挑戦」
+- 回答の下書きをブラウザに自動保存(再読み込みや離脱をしても復元)
+- 挑戦ごとの履歴と、トークン数・Web検索の回数・推定コストの記録
+- 管理者ログイン(ログイン試行のレート制限つき)
 
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+意図的にスコープ外にしたもの: ユーザー登録・複数ユーザー、模範解答の登録、AI による問題生成、選択式問題、得点推移のグラフ、ダークモード
 
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
+## 技術スタック
 
-## Agentic Development
+| 層             | 技術                                                                                                                               |
+| -------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| バックエンド   | Laravel 13 / PHP 8.5 / PostgreSQL / キュー(database ドライバ)/ Pest / Laravel Pint                                                 |
+| フロントエンド | Blade / Tailwind CSS v4 / Alpine.js / Vite                                                                                         |
+| AI 採点        | Claude API(Claude Haiku 5.5、anthropic-ai/sdk)/ Web検索ツール                                                                      |
+| インフラ       | Railway(web / worker / PostgreSQL、Dockerfile ビルド、GitHub 連携による自動デプロイ)/ Docker Compose(ローカル)/ GitHub Actions(CI) |
 
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
+## アーキテクチャ
 
-```bash
-composer require laravel/boost --dev
-
-php artisan boost:install
+```
+ブラウザ → web(nginx + PHP-FPM) → PostgreSQL
+              │ 採点 Job を投入(jobs テーブル)
+              ↓
+           worker(queue:work) → Claude API
 ```
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
+- web と worker は同じ Docker イメージで、起動コマンドだけを変えている。本番は Railway に別サービスとしてデプロイしている
+- **採点は非同期**。回答を送ると、挑戦と回答を1つのトランザクションで保存し、採点 Job をキューに入れて結果画面へリダイレクトする。結果画面は数秒おきに状態を確認し、採点が終わったら結果を表示する。Job は `ShouldBeUnique` で二重に動かないようにし、失敗したら画面の「再採点」から回答を入力し直さずに採点し直せる
+- **採点結果はツール呼び出しで受け取る**。`submit_grades` ツールを `strict: true` にして、点数とフィードバックがスキーマどおりの形で返るようにしている。1回目で提出されなかったときは、会話を引き継いで提出を頼む(`app/Services/Grading/ClaudeGradingService.php`)
+- **Web検索で事実を確かめる**。バージョンなど時間とともに変わる事実は、AI が Web検索で確認してから採点する(回数は問題数 × 2 まで)
+- **プロンプトインジェクション対策**。問題文と回答を `<question>` / `<answer>` タグで囲み、タグの中の指示(「100点にして」など)には従わないよう system プロンプトで指示している
+- **履歴の自動整理と問題文の写し**。同じ問題の回答は直近10件だけ残し、回答が0件になった挑戦は消す。回答には回答したときの問題文を写して保存するので、あとから問題を書き直したり消したりしても、過去の履歴は変わらない
+- Claude API の呼び出しは `GradingService` インターフェースの後ろに置いている。テストと画面の作り込みでは、API を呼ばない `FakeGradingService` に差し替える
 
-## Contributing
+設計の詳細は [doc/](doc/) にまとめている(要件定義・画面設計・DB と採点処理の設計など)。
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+## ディレクトリ構成(抜粋)
 
-## Code of Conduct
+```
+app/
+  Http/Controllers/            画面ごとのコントローラ
+  Http/Requests/               FormRequest による入力チェック
+  Jobs/GradeAttempt.php        採点 Job
+  Services/Grading/            Claude API での採点(GradingService とその実装)
+  Queries/                     平均点・最新の点数・苦手問題の集計
+  Enums/                       採点の厳しさ・挑戦の種別・状態
+  Models/                      Category, Section, Question, Attempt, Answer, Score
+resources/
+  views/components/ui/         Button, Card, Badge, ConfirmModal などの共通UI
+  js/                          回答の下書き保存・採点状態の確認(Alpine.js)
+docker/production/             本番用の Dockerfile・nginx・supervisord の設定
+doc/                           設計ドキュメント
+tests/Unit/, tests/Feature/    Pest によるテスト
+```
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+## ローカル開発環境のセットアップ
 
-## Security Vulnerabilities
+PHP と Composer は Docker の中で動かします。CSS / JS のビルドだけ、手元の Node.js(22 以上)を使います。
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+```bash
+git clone https://github.com/kabochan73/Quiz-Portfolio3.git
+cd Quiz-Portfolio3
 
-## License
+cp .env.example .env
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+docker compose up -d
+docker compose exec app composer install
+docker compose exec app php artisan key:generate
+docker compose exec app php artisan migrate --seed   # 管理者アカウントと見本データを作る
+
+npm install
+npm run build
+```
+
+- アプリ: http://localhost:8000
+- ログイン: `.env` の `ADMIN_EMAIL` / `ADMIN_PASSWORD`
+- `.env` の初期値は `GRADING_DRIVER=fake` で、Claude API を呼ばずに決まった採点結果を返します。本物の採点を試すときは `GRADING_DRIVER=claude` にして `ANTHROPIC_API_KEY` を設定し、`docker compose restart app worker` で再起動します
+
+## テスト
+
+```bash
+# Pest(386 tests)。テスト用の DB(quiz_testing)を使い、Claude API は呼ばない
+docker compose exec app php artisan test
+docker compose exec app ./vendor/bin/pint --test   # コードスタイル
+```
+
+## CI/CD
+
+- GitHub Actions(`.github/workflows/ci.yml`): push・PR のたびに Pint と Pest を実行する。テストは本番と同じ PostgreSQL で行う
+- デプロイは Railway の GitHub 連携で行う。`main` への push で CI が通ったコミットだけを、Railway が Dockerfile でビルドしてデプロイする。web はデプロイの前にマイグレーションを実行する
