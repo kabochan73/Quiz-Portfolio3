@@ -6,7 +6,6 @@ use App\Models\Attempt;
 use App\Models\Question;
 use App\Models\Section;
 use App\Services\AnswerRetentionService;
-use App\Services\EmptyAttemptPruner;
 
 beforeEach(function () {
     config(['quiz.answer_retention_limit' => 3]);
@@ -74,14 +73,4 @@ test('保持件数の既定値は10件', function () {
     app(AnswerRetentionService::class)->prune([$this->q1->id]);
 
     expect(Answer::count())->toBe(10);
-});
-
-test('空の挑戦の削除は、回答が残っている挑戦には何もしない', function () {
-    $withAnswers = scoredAttempt($this->section, [$this->q1->id => 50]);
-    $empty = Attempt::factory()->for($this->section)->create();
-
-    $deleted = app(EmptyAttemptPruner::class)->prune([$withAnswers->id, $empty->id]);
-
-    expect($deleted)->toBe(1)
-        ->and(Attempt::pluck('id')->all())->toBe([$withAnswers->id]);
 });

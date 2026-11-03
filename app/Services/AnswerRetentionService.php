@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\Answer;
+use App\Models\Attempt;
 use Illuminate\Support\Facades\DB;
 
 /**
@@ -12,8 +13,6 @@ use Illuminate\Support\Facades\DB;
  */
 final readonly class AnswerRetentionService
 {
-    public function __construct(private EmptyAttemptPruner $pruner) {}
-
     /**
      * 回答を保存したトランザクションの中で、今回回答した問題について呼ぶ。
      *
@@ -41,7 +40,11 @@ final readonly class AnswerRetentionService
 
                 // scores は cascade で一緒に消える
                 Answer::query()->whereIn('id', $oldAnswers->pluck('id'))->delete();
-                $this->pruner->prune($oldAnswers->pluck('attempt_id'));
+                // 回答のない挑戦が履歴に残らないよう、回答が0件になった挑戦も消す
+                Attempt::query()
+                    ->whereIn('id', $oldAnswers->pluck('attempt_id')->unique())
+                    ->whereDoesntHave('answers')
+                    ->delete();
             }
         });
     }
