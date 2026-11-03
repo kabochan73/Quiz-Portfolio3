@@ -60,8 +60,9 @@ class QuestionController extends Controller
 
     public function destroy(Question $question): RedirectResponse
     {
-        // 回答が0件になった挑戦も一緒に消す(architecture.md 4.6)。削除後は1つ上の階層へ(screens.md 3章)
-        $this->questions->delete($question);
+        // 回答・採点結果・挑戦(履歴)は残す。回答の問題への参照は DB の ON DELETE SET NULL で空になり、
+        // 問題文は回答の写し(question_body)に残る(architecture.md 4.6)。削除後は1つ上の階層へ(screens.md 3章)
+        $question->delete();
 
         return redirect()->route('sections.show', $question->section_id)
             ->with('toast', ['type' => 'success', 'message' => 'Question deleted.']);

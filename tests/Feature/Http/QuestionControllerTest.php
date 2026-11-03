@@ -50,8 +50,9 @@ test('問題文を変更できる。所属するセクションは変えられ�
 });
 
 test('問題を削除しても履歴は残り、セクション詳細へ戻る', function () {
-    // architecture.md 4.6(2026-10-13 決定)
+    // architecture.md 2.5 / 4.6(2026-10-13 決定)
     [$q1, $q2] = Question::factory()->count(2)->for($this->section)->create();
+    $q1Body = $q1->body;
     $onlyQ1 = scoredAttempt($this->section, [$q1->id => 50]);
     $both = scoredAttempt($this->section, [$q1->id => 50, $q2->id => 80]);
 
@@ -59,8 +60,14 @@ test('問題を削除しても履歴は残り、セクション詳細へ戻る',
         ->assertRedirect(route('sections.show', $this->section))
         ->assertSessionHas('toast', ['type' => 'success', 'message' => 'Question deleted.']);
 
+    // 回答は問題への参照だけが空になり、問題文の写しと採点結果は残る
+    $kept = $onlyQ1->answers()->sole();
     expect(Question::pluck('id')->all())->toBe([$q2->id])
-        ->and(Attempt::orderBy('id')->pluck('id')->all())->toBe([$onlyQ1->id, $both->id]);
+        ->and(Attempt::orderBy('id')->pluck('id')->all())->toBe([$onlyQ1->id, $both->id])
+        ->and($both->answers()->count())->toBe(2)
+        ->and($kept->question_id)->toBeNull()
+        ->and($kept->question_body)->toBe($q1Body)
+        ->and($kept->score)->not->toBeNull();
 });
 
 test('存在しないセクション・問題は 404', function () {

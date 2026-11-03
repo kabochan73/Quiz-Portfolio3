@@ -7,7 +7,7 @@ use App\Models\Section;
 use Illuminate\Support\Facades\DB;
 
 /**
- * 問題の作成と削除。作成は、上限のチェックと追加をトランザクションで囲む(CLAUDE.md)。
+ * 問題の作成。上限のチェックと追加をトランザクションで囲む(CLAUDE.md)。
  */
 final readonly class QuestionService
 {
@@ -29,14 +29,5 @@ final readonly class QuestionService
 
             return $section->questions()->create(['body' => $body]);
         });
-    }
-
-    /**
-     * 問題を削除する。回答・採点結果・挑戦(履歴)は残す(architecture.md 4.6。2026-10-13 決定)。
-     * 回答の問題への参照は DB の ON DELETE SET NULL で空になり、問題文は回答の写し(question_body)に残る。
-     */
-    public function delete(Question $question): void
-    {
-        $question->delete();
     }
 }

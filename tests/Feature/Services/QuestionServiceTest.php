@@ -1,6 +1,5 @@
 <?php
 
-use App\Models\Attempt;
 use App\Models\Question;
 use App\Models\Section;
 use App\Services\QuestionLimitExceededException;
@@ -55,31 +54,4 @@ test('問題数を数える前に、セクションの行をロックする', fu
 
     expect($lockIndex)->not->toBeFalse()
         ->and($lockIndex)->toBeLessThan($countIndex);
-});
-
-test('問題を削除しても、回答・採点結果・挑戦は残り、回答には問題文の写しが残る', function () {
-    // architecture.md 2.5 / 4.6(2026-10-13 決定): 履歴を残す
-    $section = Section::factory()->create();
-    [$q1, $q2] = Question::factory()->count(2)->for($section)->create();
-    $q1Body = $q1->body;
-    $onlyQ1 = scoredAttempt($section, [$q1->id => 50]);
-    $both = scoredAttempt($section, [$q1->id => 50, $q2->id => 80]);
-
-    app(QuestionService::class)->delete($q1);
-
-    $kept = $onlyQ1->answers()->sole();
-    expect(Question::find($q1->id))->toBeNull()
-        ->and(Attempt::find($onlyQ1->id))->not->toBeNull()
-        ->and($both->answers()->count())->toBe(2)
-        ->and($kept->question_id)->toBeNull()
-        ->and($kept->question_body)->toBe($q1Body)
-        ->and($kept->score)->not->toBeNull();
-});
-
-test('回答のない問題も削除できる', function () {
-    $question = Question::factory()->create();
-
-    app(QuestionService::class)->delete($question);
-
-    expect(Question::count())->toBe(0);
 });
