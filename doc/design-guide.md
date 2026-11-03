@@ -76,7 +76,7 @@ v3 は**黒と白を基調にしたシックなデザイン**にする(2026-10-1
 | 役割 | クラス | サイズ / 太さ | 例 |
 |---|---|---|---|
 | 大きな数字 | `text-4xl font-semibold` | 36px / 600 | 結果画面の平均点 |
-| ページ見出し | `text-2xl font-semibold tracking-tight` | 24px / 600 | `Categories` |
+| ページ見出し | `text-2xl font-semibold tracking-tight` | 24px / 600 | `History` |
 | セクション見出し | `text-lg font-semibold` | 18px / 600 | `Questions` |
 | カード見出し | `text-base font-medium` | 16px / 500 | カテゴリ名 |
 | 本文 | `text-body` | 15px / 行間 1.75 | 問題文、回答、フィードバック |
@@ -211,7 +211,7 @@ Blade の匿名コンポーネントとして `resources/views/components/ui/` �
 ### 7.10 メニュー `<x-ui.dropdown>`
 
 - 「…」ボタンを押すと、編集・削除などの副操作を表示する
-- 一覧の各行や詳細画面の右上に置き、画面を操作ボタンで埋めないようにする
+- 詳細画面の右上(ページ見出しの横)に置き、画面を操作ボタンで埋めないようにする。一覧の各行には置かない(2026-10-13 変更。行を押すと詳細や編集の画面へ移る)
 
 ### 7.11 切り替えボタン `<x-ui.radio-group>`
 
