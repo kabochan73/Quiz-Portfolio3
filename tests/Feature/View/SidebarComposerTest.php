@@ -70,5 +70,5 @@ test('URL に含まれるものから、今いるカテゴリをたどる', func
 ]);
 
 test('サイドバーの部品を使うと、この Composer が呼ばれるように登録している', function () {
-    expect(app('events')->hasListeners('composing: components.layout.sidebar'))->toBeTrue();
+    expect(app('events')->hasListeners('composing: components.layouts.sidebar'))->toBeTrue();
 });

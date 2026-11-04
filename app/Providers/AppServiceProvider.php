@@ -61,6 +61,6 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         // サイドバーの部品が使われるときに、カテゴリの一覧を渡す
-        View::composer('components.layout.sidebar', SidebarComposer::class);
+        View::composer('components.layouts.sidebar', SidebarComposer::class);
     }
 }

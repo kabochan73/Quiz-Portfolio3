@@ -12,12 +12,12 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <x-layout.head :title="$title" />
+    <x-layouts.head :title="$title" />
 </head>
 <body x-data="{ drawerOpen: false }" x-on:keydown.escape.window="drawerOpen = false">
     {{-- PC のサイドバー --}}
     <aside class="fixed inset-y-0 left-0 z-20 hidden w-64 border-r border-neutral-200 bg-white lg:block">
-        <x-layout.sidebar />
+        <x-layouts.sidebar />
     </aside>
 
     {{-- スマホのヘッダー --}}
@@ -59,7 +59,7 @@
             >
                 <x-icon name="x-mark" label="Close menu" />
             </button>
-            <x-layout.sidebar />
+            <x-layouts.sidebar />
         </div>
     </div>
 

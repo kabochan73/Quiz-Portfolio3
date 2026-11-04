@@ -9,7 +9,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <x-layout.head :title="$title" />
+    <x-layouts.head :title="$title" />
 </head>
 <body class="bg-neutral-50">
     <main class="flex min-h-screen items-center justify-center px-4 py-10">
