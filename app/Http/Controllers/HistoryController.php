@@ -27,7 +27,7 @@ class HistoryController extends Controller
             ->orderByDesc('id')
             ->simplePaginate(self::PER_PAGE);
 
-        return view('history.index', [
+        return view('pages.history.index', [
             'section' => $section->load('category'),
             'attempts' => $attempts,
             // 採点が終わっていない挑戦は平均点がないので、画面では状態のバッジを出す
@@ -50,7 +50,7 @@ class HistoryController extends Controller
         $attempt->load('answers.score');
         $questionIds = $attempt->answers->pluck('question_id');
 
-        return view('history.show', [
+        return view('pages.history.show', [
             'section' => $section->load('category'),
             'attempt' => $attempt,
             'average' => $averages->forAttempts([$attempt->id])[$attempt->id] ?? null,

@@ -9,7 +9,7 @@
 
     <x-ui.page-header title="Edit section" />
 
-    @include('sections._form', [
+    @include('pages.sections.partials.form', [
         'action' => route('sections.update', $section),
         'method' => 'PUT',
         'submitLabel' => 'Save',

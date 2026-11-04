@@ -12,6 +12,6 @@ class HomeController extends Controller
 {
     public function __invoke(): View
     {
-        return view('home');
+        return view('pages.home');
     }
 }

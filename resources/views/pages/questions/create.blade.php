@@ -9,7 +9,7 @@
 
     <x-ui.page-header title="Add question" />
 
-    @include('questions._form', [
+    @include('pages.questions.partials.form', [
         'question' => null,
         'action' => route('sections.questions.store', $section),
         'method' => 'POST',

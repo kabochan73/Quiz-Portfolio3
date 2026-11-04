@@ -12,7 +12,7 @@
 
     <x-ui.page-header title="Edit question" />
 
-    @include('questions._form', [
+    @include('pages.questions.partials.form', [
         'action' => route('questions.update', $question),
         'method' => 'PUT',
         'submitLabel' => 'Save',

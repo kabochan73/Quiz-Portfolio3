@@ -8,7 +8,7 @@
 
     <x-ui.page-header title="New section" />
 
-    @include('sections._form', [
+    @include('pages.sections.partials.form', [
         'section' => null,
         'action' => route('categories.sections.store', $category),
         'method' => 'POST',

@@ -7,7 +7,7 @@
 
     <x-ui.page-header title="New category" />
 
-    @include('categories._form', [
+    @include('pages.categories.partials.form', [
         'category' => null,
         'action' => route('categories.store'),
         'method' => 'POST',

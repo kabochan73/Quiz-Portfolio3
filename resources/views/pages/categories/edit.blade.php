@@ -8,7 +8,7 @@
 
     <x-ui.page-header title="Edit category" />
 
-    @include('categories._form', [
+    @include('pages.categories.partials.form', [
         'action' => route('categories.update', $category),
         'method' => 'PUT',
         'submitLabel' => 'Save',

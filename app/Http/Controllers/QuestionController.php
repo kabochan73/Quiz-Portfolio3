@@ -22,7 +22,7 @@ class QuestionController extends Controller
 
     public function create(Section $section): View
     {
-        return view('questions.create', ['section' => $section->load('category')]);
+        return view('pages.questions.create', ['section' => $section->load('category')]);
     }
 
     public function store(QuestionRequest $request, Section $section): RedirectResponse
@@ -43,7 +43,7 @@ class QuestionController extends Controller
 
     public function edit(Question $question): View
     {
-        return view('questions.edit', [
+        return view('pages.questions.edit', [
             'question' => $question->load('section.category'),
             'number' => $this->numberOf($question),
         ]);

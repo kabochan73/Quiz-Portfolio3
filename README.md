@@ -63,6 +63,7 @@ app/
   Enums/                       採点の厳しさ・挑戦の種別・状態
   Models/                      Category, Section, Question, Attempt, Answer, Score
 resources/
+  views/pages/                 画面(画面ごとのフォルダ。部分テンプレートは partials/)
   views/components/ui/         Button, Card, Badge, ConfirmModal などの共通UI
   js/                          回答の下書き保存・採点状態の確認(Alpine.js)
 docker/production/             本番用の Dockerfile・nginx・supervisord の設定

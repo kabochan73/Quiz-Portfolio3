@@ -451,7 +451,7 @@ AIの採点中にエラーが発生しました。回答は保存されている
 | | ラベル / ボタン | `Email` / `Password` / `Log in` |
 | | 認証エラー | `These credentials do not match our records.`(Laravel 標準) |
 | | 試行回数の制限 | `Too many login attempts. Please try again in 42 seconds.`(Laravel 標準) |
-| ホーム | 文章 | 日本語の紹介文。文面は `resources/views/home.blade.php` を正とする(2.12) |
+| ホーム | 文章 | 日本語の紹介文。文面は `resources/views/pages/home.blade.php` を正とする(2.12) |
 | | ボタン | `New category` |
 | サイドバー | カテゴリの見出し | `Categories`(リンクにしない) |
 | カテゴリ作成・編集 | 見出し / ラベル | `New category` / `Edit category` / `Name` |

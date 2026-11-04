@@ -15,7 +15,7 @@ class CategoryController extends Controller
 {
     public function create(): View
     {
-        return view('categories.create');
+        return view('pages.categories.create');
     }
 
     public function store(CategoryRequest $request): RedirectResponse
@@ -34,7 +34,7 @@ class CategoryController extends Controller
             ->orderBy('id')
             ->get();
 
-        return view('categories.show', [
+        return view('pages.categories.show', [
             'category' => $category,
             'sections' => $sections,
             // 削除の確認モーダルで、一緒に消えるものの件数を出す(requirements.md 5.3)
@@ -48,7 +48,7 @@ class CategoryController extends Controller
 
     public function edit(Category $category): View
     {
-        return view('categories.edit', ['category' => $category]);
+        return view('pages.categories.edit', ['category' => $category]);
     }
 
     public function update(CategoryRequest $request, Category $category): RedirectResponse

@@ -1,6 +1,6 @@
 {{--
     採点結果 = 履歴詳細(screens.md 2.10)。採点の直後も、あとから履歴で開いたときも同じ画面。
-    採点の状態によって、採点中(_grading)/ 完了(_completed)/ 失敗(_failed)の表示を切り替える。
+    採点の状態によって、採点中(partials/grading)/ 完了(partials/completed)/ 失敗(partials/failed)の表示を切り替える。
 --}}
 @use('App\Enums\AttemptStatus')
 @use('App\Support\DisplayTime')
@@ -26,10 +26,10 @@
     <div x-data="draftCleaner(@js("quiz:draft:section:{$section->id}:{$attempt->mode->value}"))"></div>
 
     @if ($attempt->status->isInProgress())
-        @include('history._grading')
+        @include('pages.history.partials.grading')
     @elseif ($attempt->status === AttemptStatus::Failed)
-        @include('history._failed')
+        @include('pages.history.partials.failed')
     @else
-        @include('history._completed')
+        @include('pages.history.partials.completed')
     @endif
 </x-layouts.app>

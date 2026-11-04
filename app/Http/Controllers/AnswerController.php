@@ -38,7 +38,7 @@ class AnswerController extends Controller
             ]);
         }
 
-        return view('answers.create', [
+        return view('pages.answers.create', [
             'section' => $section->load('category'),
             'mode' => $mode,
             'questions' => $questions,

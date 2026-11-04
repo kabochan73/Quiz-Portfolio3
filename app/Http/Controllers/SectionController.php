@@ -17,7 +17,7 @@ class SectionController extends Controller
 {
     public function create(Category $category): View
     {
-        return view('sections.create', ['category' => $category]);
+        return view('pages.sections.create', ['category' => $category]);
     }
 
     public function store(SectionRequest $request, Category $category): RedirectResponse
@@ -32,7 +32,7 @@ class SectionController extends Controller
     {
         $questions = $section->questions()->get();
 
-        return view('sections.show', [
+        return view('pages.sections.show', [
             'section' => $section->load('category'),
             'questions' => $questions,
             // 「苦手だけ再挑戦」のボタンに出す問題数。0問ならボタンを無効にする(screens.md 2.6)
@@ -49,7 +49,7 @@ class SectionController extends Controller
 
     public function edit(Section $section): View
     {
-        return view('sections.edit', ['section' => $section->load('category')]);
+        return view('pages.sections.edit', ['section' => $section->load('category')]);
     }
 
     public function update(SectionRequest $request, Section $section): RedirectResponse
